@@ -236,7 +236,8 @@ textarea {
 .panel,
 .candidate-card,
 .client-card,
-.report-card {
+.report-card,
+.role-card {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -297,7 +298,8 @@ textarea {
 .client-list,
 .report-list,
 .form-stack,
-.candidate-grid {
+.candidate-grid,
+.role-list {
   display: grid;
   gap: 10px;
 }
@@ -367,6 +369,33 @@ textarea {
 .member-line strong,
 .member-line span {
   display: block;
+}
+
+.role-card {
+  padding: 14px;
+}
+
+.role-card strong,
+.role-card span,
+.role-card small {
+  display: block;
+}
+
+.role-card span {
+  color: var(--green);
+  font-size: 13px;
+  font-weight: 800;
+  margin-top: 3px;
+}
+
+.role-card p {
+  color: var(--ink);
+  line-height: 1.4;
+  margin: 10px 0;
+}
+
+.role-card small {
+  color: var(--muted);
 }
 
 .score-ring {

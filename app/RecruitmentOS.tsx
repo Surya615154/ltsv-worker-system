@@ -7,6 +7,8 @@ type Member = {
   name: string;
   role: string;
   desk: string;
+  responsibility: string;
+  targetText: string;
   attendance: "On time" | "Late" | "Absent";
   calls: number;
   cv: number;
@@ -33,7 +35,15 @@ type Requirement = {
   positions: number;
   salary: string;
   priority: "High" | "Medium" | "Low";
-  status: "New" | "Sourcing" | "Submitted" | "Interview" | "Offer" | "Closed";
+  status:
+    | "Vacancy Found"
+    | "Sourcing"
+    | "CV Submitted"
+    | "Interview"
+    | "Offer"
+    | "Joined"
+    | "Invoice"
+    | "Closed";
   owner: string;
 };
 
@@ -43,7 +53,19 @@ type Candidate = {
   role: string;
   phone: string;
   city: string;
-  stage: "Screening" | "Submitted" | "Interview" | "Selected" | "Joined" | "Rejected";
+  stage:
+    | "Application"
+    | "Calling"
+    | "Screening"
+    | "Shortlisted"
+    | "CV Submitted"
+    | "Interview Scheduled"
+    | "Interview Done"
+    | "Selected"
+    | "Documents"
+    | "Joined"
+    | "Invoice"
+    | "Rejected";
   owner: string;
   company: string;
 };
@@ -79,159 +101,247 @@ const seedState: OfficeState = {
   members: [
     {
       id: "m1",
-      name: "Aarav",
-      role: "Recruiter",
-      desk: "Manufacturing",
+      name: "Sagar Sonawane",
+      role: "Director / Owner",
+      desk: "Boss control",
+      responsibility:
+        "Check if everyone is working properly, assign roles, review activity, and take final decisions.",
+      targetText: "Morning work allocation + evening review of every staff member",
       attendance: "On time",
-      calls: 42,
-      cv: 11,
-      interviews: 4,
-      target: 50,
+      calls: 12,
+      cv: 0,
+      interviews: 2,
+      target: 20,
     },
     {
       id: "m2",
-      name: "Sneha",
+      name: "Sonali Shingre Ma'am",
+      role: "HR Head / Admin",
+      desk: "HR and candidate handling",
+      responsibility:
+        "Candidate handling, calling, vacancy finding, admin coordination, and HR process discipline.",
+      targetText: "40 candidate/client coordination calls + vacancy update sheet",
+      attendance: "On time",
+      calls: 38,
+      cv: 8,
+      interviews: 3,
+      target: 50,
+    },
+    {
+      id: "m3",
+      name: "Vishwatej Suryawanshi",
       role: "BDO",
-      desk: "Client acquisition",
-      attendance: "Late",
-      calls: 28,
+      desk: "Company approach",
+      responsibility:
+        "Company approach, permission calls, meeting scheduling, client visits, agreements, and business follow-up.",
+      attendance: "On time",
+      targetText: "35 company calls + 5 hot follow-ups + 1 meeting/visit pipeline",
+      calls: 32,
       cv: 0,
       interviews: 0,
       target: 35,
     },
     {
-      id: "m3",
-      name: "Vikram",
-      role: "Coordinator",
-      desk: "Joining support",
+      id: "m4",
+      name: "Rohan Dongre",
+      role: "Recruiter",
+      desk: "Sourcing to joining",
+      responsibility:
+        "Screening, sourcing, interview scheduling, candidate follow-up, joining confirmation, and invoice generation.",
+      targetText: "50 sourcing calls + 10 screened CVs + interview/joining follow-up",
       attendance: "On time",
-      calls: 31,
-      cv: 3,
-      interviews: 7,
-      target: 30,
+      calls: 46,
+      cv: 10,
+      interviews: 5,
+      target: 60,
+    },
+    {
+      id: "m5",
+      name: "Laxmi",
+      role: "Coordinator",
+      desk: "Candidate application calling",
+      responsibility:
+        "Cold calling candidates, collecting applications, updating basic details, and forwarding interested candidates.",
+      targetText: "80 candidate cold calls + 20 application entries",
+      attendance: "On time",
+      calls: 72,
+      cv: 14,
+      interviews: 0,
+      target: 85,
+    },
+    {
+      id: "m6",
+      name: "Preeti",
+      role: "Coordinator",
+      desk: "Candidate application calling",
+      responsibility:
+        "Cold calling candidates, collecting applications, updating basic details, and forwarding interested candidates.",
+      targetText: "80 candidate cold calls + 20 application entries",
+      attendance: "On time",
+      calls: 68,
+      cv: 12,
+      interviews: 0,
+      target: 85,
     },
   ],
   clients: [
     {
       id: "cl1",
-      company: "Nashik Auto Components",
-      contact: "Mr. Patil",
+      company: "Press Metal Industries",
+      contact: "HR / Plant Admin",
       city: "Nashik",
       industry: "Manufacturing",
       status: "Active",
       model: "8.33% Annual CTC",
-      owner: "Sneha",
+      owner: "Vishwatej Suryawanshi",
       nextFollowUp: "Today 4:30 PM",
     },
     {
       id: "cl2",
-      company: "Western Logistics Hub",
+      company: "NMD",
       contact: "HR Team",
-      city: "Pune",
-      industry: "Logistics",
-      status: "Agreement",
+      city: "Nashik",
+      industry: "Multi-sector",
+      status: "Active",
       model: "10% Monthly",
-      owner: "Aarav",
+      owner: "Sagar Sonawane",
       nextFollowUp: "Tomorrow",
+    },
+    {
+      id: "cl3",
+      company: "Biolaxi Enzymes",
+      contact: "HR / Operations",
+      city: "Nashik",
+      industry: "Pharma / Biotech",
+      status: "Agreement",
+      model: "60% One Month Salary",
+      owner: "Vishwatej Suryawanshi",
+      nextFollowUp: "This week",
     },
   ],
   requirements: [
     {
       id: "r1",
-      title: "CNC Operator",
-      company: "Nashik Auto Components",
-      positions: 12,
-      salary: "18k-24k",
+      title: "Production Operator",
+      company: "Press Metal Industries",
+      positions: 10,
+      salary: "As per company budget",
       priority: "High",
       status: "Interview",
-      owner: "Aarav",
+      owner: "Rohan Dongre",
     },
     {
       id: "r2",
-      title: "Warehouse Supervisor",
-      company: "Western Logistics Hub",
-      positions: 4,
-      salary: "28k-35k",
+      title: "Helper / Worker",
+      company: "NMD",
+      positions: 15,
+      salary: "As per requirement",
       priority: "Medium",
       status: "Sourcing",
-      owner: "Vikram",
+      owner: "Laxmi",
+    },
+    {
+      id: "r3",
+      title: "Lab Assistant",
+      company: "Biolaxi Enzymes",
+      positions: 3,
+      salary: "18k-25k",
+      priority: "High",
+      status: "Vacancy Found",
+      owner: "Sonali Shingre Ma'am",
     },
   ],
   candidates: [
     {
       id: "ca1",
-      name: "Rahul Jadhav",
-      role: "CNC Operator",
+      name: "Sample Candidate 1",
+      role: "Production Operator",
       phone: "98xxxxxx10",
-      city: "Sinnar",
-      stage: "Interview",
-      owner: "Aarav",
-      company: "Nashik Auto Components",
+      city: "Nashik",
+      stage: "Interview Scheduled",
+      owner: "Rohan Dongre",
+      company: "Press Metal Industries",
     },
     {
       id: "ca2",
-      name: "Priya More",
-      role: "HR Executive",
+      name: "Sample Candidate 2",
+      role: "Helper / Worker",
       phone: "90xxxxxx22",
       city: "Nashik",
-      stage: "Submitted",
-      owner: "Sneha",
-      company: "Pipeline",
+      stage: "Application",
+      owner: "Preeti",
+      company: "NMD",
     },
   ],
   followUps: [
     {
       id: "f1",
       type: "Client",
-      title: "Agreement signature from Western Logistics Hub",
-      owner: "Sneha",
+      title: "Follow up with Biolaxi Enzymes for agreement confirmation",
+      owner: "Vishwatej Suryawanshi",
       due: "Today",
       status: "Pending",
     },
     {
       id: "f2",
       type: "Joining",
-      title: "Confirm Rahul interview timing",
-      owner: "Aarav",
+      title: "Confirm Press Metal interview schedule",
+      owner: "Rohan Dongre",
       due: "Today",
       status: "Pending",
     },
     {
       id: "f3",
       type: "Payment",
-      title: "Invoice follow-up: May joining",
-      owner: "Vikram",
+      title: "Prepare invoice status after joining confirmation",
+      owner: "Rohan Dongre",
       due: "Tomorrow",
+      status: "Pending",
+    },
+    {
+      id: "f4",
+      type: "Candidate",
+      title: "Cold calling application batch update",
+      owner: "Laxmi / Preeti",
+      due: "Today",
       status: "Pending",
     },
   ],
   reports: [
     {
       id: "d1",
-      member: "Aarav",
+      member: "Vishwatej Suryawanshi",
       date: new Date().toISOString().slice(0, 10),
-      completed: "11 CVs sourced, 4 interviews fixed",
-      stuck: "One candidate salary mismatch",
-      tomorrow: "Close CNC shortlist",
+      completed: "Company calls, permission follow-ups, and meeting pipeline updated",
+      stuck: "Need decision on next client visit priority",
+      tomorrow: "Push agreement follow-up and schedule one client meeting",
     },
   ],
 };
 
 const stages: Candidate["stage"][] = [
+  "Application",
+  "Calling",
   "Screening",
-  "Submitted",
-  "Interview",
+  "Shortlisted",
+  "CV Submitted",
+  "Interview Scheduled",
+  "Interview Done",
   "Selected",
+  "Documents",
   "Joined",
+  "Invoice",
   "Rejected",
 ];
 
 const requirementStatuses: Requirement["status"][] = [
-  "New",
+  "Vacancy Found",
   "Sourcing",
-  "Submitted",
+  "CV Submitted",
   "Interview",
   "Offer",
+  "Joined",
+  "Invoice",
   "Closed",
 ];
 
@@ -242,6 +352,17 @@ function makeId(prefix: string) {
 function scoreMember(member: Member) {
   const activity = member.calls + member.cv * 3 + member.interviews * 5;
   return Math.min(100, Math.round((activity / Math.max(member.target, 1)) * 100));
+}
+
+function hasOfficeData(payload: OfficeState) {
+  return (
+    payload.members.length > 0 ||
+    payload.clients.length > 0 ||
+    payload.requirements.length > 0 ||
+    payload.candidates.length > 0 ||
+    payload.followUps.length > 0 ||
+    payload.reports.length > 0
+  );
 }
 
 export default function RecruitmentOS() {
@@ -256,7 +377,7 @@ export default function RecruitmentOS() {
         const response = await fetch("/api/state", { cache: "no-store" });
         if (!response.ok) return;
         const payload = (await response.json()) as OfficeState;
-        if (!cancelled) setState(payload);
+        if (!cancelled && hasOfficeData(payload)) setState(payload);
       } catch {
         setSaveStatus("Offline sample mode");
       }
@@ -292,8 +413,8 @@ export default function RecruitmentOS() {
     const todayFollowUps = state.followUps.filter(
       (item) => item.status === "Pending" && item.due.toLowerCase().includes("today"),
     );
-    const interviews = state.candidates.filter(
-      (item) => item.stage === "Interview",
+    const interviews = state.candidates.filter((item) =>
+      ["Interview Scheduled", "Interview Done"].includes(item.stage),
     ).length;
     const joined = state.candidates.filter((item) => item.stage === "Joined").length;
     const discipline =
@@ -347,8 +468,8 @@ export default function RecruitmentOS() {
           positions: Number(form.get("positions") || 1),
           salary: String(form.get("salary") || "As per market"),
           priority: "High",
-          status: "New",
-          owner: String(form.get("owner") || "Recruiter"),
+          status: "Vacancy Found",
+          owner: String(form.get("owner") || "Rohan Dongre"),
         },
         ...current.requirements,
       ],
@@ -368,8 +489,8 @@ export default function RecruitmentOS() {
           role: String(form.get("role") || "Role"),
           phone: String(form.get("phone") || ""),
           city: String(form.get("city") || "Nashik"),
-          stage: "Screening",
-          owner: String(form.get("owner") || "Recruiter"),
+          stage: "Application",
+          owner: String(form.get("owner") || "Laxmi"),
           company: String(form.get("company") || "Pipeline"),
         },
         ...current.candidates,
@@ -464,12 +585,13 @@ export default function RecruitmentOS() {
       <section className="workspace">
         <header className="topbar">
           <div>
-            <p className="eyebrow">Tuesday operating board</p>
+            <p className="eyebrow">All-sector recruitment operating board</p>
             <h2>{activeView}</h2>
           </div>
           <div className="topbar-actions">
             <select aria-label="Viewing role">
-              <option>Boss</option>
+              <option>Boss / Director</option>
+              <option>HR Head / Admin</option>
               <option>BDO</option>
               <option>Recruiter</option>
               <option>Coordinator</option>
@@ -485,7 +607,7 @@ export default function RecruitmentOS() {
             <section className="metric-grid" aria-label="Office metrics">
               <Metric label="Active clients" value={metrics.activeClients} detail="signed or working" />
               <Metric label="Open roles" value={metrics.openRequirements} detail={`${metrics.totalPositions} positions`} />
-              <Metric label="Interviews" value={metrics.interviews} detail="candidate stage" />
+              <Metric label="Interviews" value={metrics.interviews} detail="scheduled/done" />
               <Metric label="Today follow-ups" value={metrics.todayFollowUps} detail="pending only" />
               <Metric label="Joinings" value={metrics.joined} detail="confirmed records" />
               <Metric label="Discipline" value={`${metrics.discipline}%`} detail="activity vs target" />
@@ -660,29 +782,48 @@ export default function RecruitmentOS() {
         )}
 
         {activeView === "Team" && (
-          <section className="panel">
-            <PanelHeader title="Staff Discipline Sheet" label="Attendance and activity" />
-            <div className="data-table team-table">
-              <div className="table-head">
-                <span>Name</span>
-                <span>Attendance</span>
-                <span>Calls</span>
-                <span>CVs</span>
-                <span>Interviews</span>
-                <span>Score</span>
-              </div>
-              {state.members.map((member) => (
-                <div className="table-row" key={member.id}>
-                  <span><strong>{member.name}</strong><small>{member.role}</small></span>
-                  <span className={`attendance ${member.attendance.toLowerCase().replace(" ", "-")}`}>
-                    {member.attendance}
-                  </span>
-                  <span>{member.calls}</span>
-                  <span>{member.cv}</span>
-                  <span>{member.interviews}</span>
-                  <span>{scoreMember(member)}%</span>
+          <section className="board-grid">
+            <div className="panel wide">
+              <PanelHeader title="Staff Discipline Sheet" label="Attendance and activity" />
+              <div className="data-table team-table">
+                <div className="table-head">
+                  <span>Name</span>
+                  <span>Attendance</span>
+                  <span>Calls</span>
+                  <span>CVs</span>
+                  <span>Interviews</span>
+                  <span>Score</span>
                 </div>
+                {state.members.map((member) => (
+                  <div className="table-row" key={member.id}>
+                    <span>
+                      <strong>{member.name}</strong>
+                      <small>{member.role} / {member.desk}</small>
+                    </span>
+                    <span className={`attendance ${member.attendance.toLowerCase().replace(" ", "-")}`}>
+                      {member.attendance}
+                    </span>
+                    <span>{member.calls}</span>
+                    <span>{member.cv}</span>
+                    <span>{member.interviews}</span>
+                    <span>{scoreMember(member)}%</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="panel">
+              <PanelHeader title="Role Playbook" label="Who does what" />
+              <div className="role-list">
+              {state.members.map((member) => (
+                <article className="role-card" key={`${member.id}-role`}>
+                  <strong>{member.name}</strong>
+                  <span>{member.role}</span>
+                  <p>{member.responsibility}</p>
+                  <small>Target: {member.targetText}</small>
+                </article>
               ))}
+              </div>
             </div>
           </section>
         )}
