@@ -11,7 +11,9 @@ test("contains the recruitment office operating system", async () => {
   ]);
 
   assert.match(page, /<RecruitmentOS \/>/);
-  assert.match(layout, /title:\s*"LTSV Worker System"/);
+  assert.match(layout, /title:\s*"Life Time Success Vision"/);
+  assert.match(layout, /\/ltsv-logo\.png/);
+  assert.match(app, /Life Time Success Vision/);
   assert.match(app, /Office Control/);
   assert.match(app, /Today Command Board/);
   assert.match(app, /Staff Discipline Sheet/);
@@ -36,4 +38,5 @@ test("includes shared storage and removes starter dependency", async () => {
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 
   await access(new URL("../dist/server/index.js", import.meta.url));
+  await access(new URL("../public/ltsv-logo.png", import.meta.url));
 });

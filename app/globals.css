@@ -77,15 +77,13 @@ button {
   align-items: center;
 }
 
-.brand-mark {
-  width: 48px;
-  height: 48px;
-  display: grid;
-  place-items: center;
-  border-radius: 8px;
-  background: #f2d16b;
-  color: #17342f;
-  font-weight: 800;
+.brand-logo {
+  width: 56px;
+  height: 56px;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  object-fit: cover;
 }
 
 .brand-block h1,
@@ -188,6 +186,14 @@ button {
 .topbar h2 {
   font-size: clamp(28px, 4vw, 42px);
   line-height: 1;
+}
+
+.brand-subline {
+  color: var(--muted);
+  display: block;
+  font-size: 14px;
+  font-weight: 700;
+  margin-top: 8px;
 }
 
 .topbar-actions {

@@ -13,11 +13,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "LTSV Worker System",
-  description: "Internal recruitment office control system.",
+  title: "Life Time Success Vision",
+  description: "Internal recruitment office control system for Life Time Success Vision.",
   icons: {
-    icon: "/favicon.svg",
-    shortcut: "/favicon.svg",
+    icon: "/ltsv-logo.png",
+    shortcut: "/ltsv-logo.png",
   },
 };
 

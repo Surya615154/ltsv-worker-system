@@ -564,11 +564,13 @@ export default function RecruitmentOS() {
     <main className="app-shell">
       <aside className="sidebar" aria-label="Recruitment system navigation">
         <div className="brand-block">
-          <div className="brand-mark" aria-hidden="true">
-            LS
-          </div>
+          <img
+            alt="Life Time Success Vision logo"
+            className="brand-logo"
+            src="/ltsv-logo.png"
+          />
           <div>
-            <p className="eyebrow">LTSV Worker System</p>
+            <p className="eyebrow">Life Time Success Vision</p>
             <h1>Office Control</h1>
           </div>
         </div>
@@ -599,6 +601,7 @@ export default function RecruitmentOS() {
           <div>
             <p className="eyebrow">All-sector recruitment operating board</p>
             <h2>{activeView}</h2>
+            <span className="brand-subline">We get to opportunity</span>
           </div>
           <div className="topbar-actions">
             <select aria-label="Viewing role">
