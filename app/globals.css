@@ -1,0 +1,578 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f5f7f6;
+  --foreground: #18211f;
+  --muted: #65716d;
+  --line: #dfe6e2;
+  --panel: #ffffff;
+  --ink: #12231f;
+  --green: #16735f;
+  --green-soft: #e7f4ef;
+  --blue: #245a94;
+  --blue-soft: #e8f1fb;
+  --amber: #a56718;
+  --amber-soft: #fff1d8;
+  --red: #b83c3c;
+  --red-soft: #ffe7e5;
+  --shadow: 0 16px 50px rgba(26, 44, 39, 0.08);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-geist-sans), Arial, Helvetica, sans-serif;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+.app-shell {
+  display: grid;
+  grid-template-columns: 292px minmax(0, 1fr);
+  min-height: 100vh;
+}
+
+.sidebar {
+  background: #17342f;
+  color: #f8fbf9;
+  display: flex;
+  flex-direction: column;
+  gap: 28px;
+  padding: 24px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
+}
+
+.brand-block {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 14px;
+  align-items: center;
+}
+
+.brand-mark {
+  width: 48px;
+  height: 48px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #f2d16b;
+  color: #17342f;
+  font-weight: 800;
+}
+
+.brand-block h1,
+.topbar h2,
+.panel-header h3,
+.client-card h3 {
+  margin: 0;
+  letter-spacing: 0;
+}
+
+.brand-block h1 {
+  font-size: 23px;
+  line-height: 1.1;
+}
+
+.eyebrow {
+  margin: 0 0 6px;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  letter-spacing: 0;
+  text-transform: uppercase;
+}
+
+.sidebar .eyebrow {
+  color: #a9c1ba;
+}
+
+.nav-list {
+  display: grid;
+  gap: 8px;
+}
+
+.nav-button {
+  align-items: center;
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 8px;
+  color: #dce9e5;
+  display: grid;
+  grid-template-columns: 32px 1fr;
+  gap: 10px;
+  min-height: 46px;
+  padding: 8px 10px;
+  text-align: left;
+}
+
+.nav-button span {
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.08);
+  display: grid;
+  place-items: center;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.nav-button.active {
+  background: #f8fbf9;
+  color: #17342f;
+}
+
+.owner-panel {
+  margin-top: auto;
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.08);
+  padding: 16px;
+}
+
+.owner-panel strong,
+.owner-panel span {
+  display: block;
+}
+
+.owner-panel strong {
+  font-size: 24px;
+  margin-bottom: 8px;
+}
+
+.owner-panel span {
+  color: #c7d9d4;
+  font-size: 13px;
+}
+
+.workspace {
+  padding: 26px;
+  min-width: 0;
+}
+
+.topbar {
+  align-items: center;
+  display: flex;
+  gap: 20px;
+  justify-content: space-between;
+  margin-bottom: 22px;
+}
+
+.topbar h2 {
+  font-size: clamp(28px, 4vw, 42px);
+  line-height: 1;
+}
+
+.topbar-actions {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.topbar-actions button,
+.form-stack button {
+  background: var(--green);
+  border: 0;
+  border-radius: 8px;
+  color: white;
+  font-weight: 800;
+  min-height: 42px;
+  padding: 0 16px;
+}
+
+select,
+input,
+textarea {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  min-height: 42px;
+  padding: 0 12px;
+  width: 100%;
+}
+
+textarea {
+  line-height: 1.35;
+  padding-block: 10px;
+  resize: vertical;
+}
+
+.metric-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(6, minmax(130px, 1fr));
+  margin-bottom: 16px;
+}
+
+.metric-card,
+.panel,
+.candidate-card,
+.client-card,
+.report-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+}
+
+.metric-card {
+  min-height: 118px;
+  padding: 16px;
+}
+
+.metric-card span,
+.metric-card small,
+.candidate-card span,
+.candidate-card small,
+.client-card p,
+.client-card span,
+.member-line span,
+.report-card small {
+  color: var(--muted);
+}
+
+.metric-card strong {
+  display: block;
+  font-size: 34px;
+  line-height: 1;
+  margin: 12px 0 8px;
+}
+
+.board-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1.55fr) minmax(280px, 0.75fr);
+}
+
+.panel {
+  min-width: 0;
+  padding: 18px;
+}
+
+.panel.wide {
+  min-height: 260px;
+}
+
+.panel-header {
+  align-items: start;
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 14px;
+}
+
+.panel-header h3 {
+  font-size: 20px;
+}
+
+.follow-list,
+.team-stack,
+.client-list,
+.report-list,
+.form-stack,
+.candidate-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.follow-row {
+  align-items: center;
+  background: #fbfcfc;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  display: grid;
+  gap: 10px;
+  grid-template-columns: 92px minmax(0, 1fr) 90px 86px;
+  min-height: 56px;
+  padding: 10px 12px;
+  text-align: left;
+}
+
+.follow-row.done {
+  opacity: 0.58;
+  text-decoration: line-through;
+}
+
+.tag {
+  align-items: center;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  height: 28px;
+  justify-content: center;
+  padding: 0 10px;
+  width: fit-content;
+}
+
+.tag.client,
+.tag.active {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.tag.candidate {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+.tag.payment {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.tag.joining {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.member-line {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  min-height: 72px;
+  padding: 12px;
+}
+
+.member-line strong,
+.member-line span {
+  display: block;
+}
+
+.score-ring {
+  align-items: center;
+  background: var(--green-soft);
+  border-radius: 999px;
+  color: var(--green);
+  display: flex;
+  font-size: 13px;
+  font-weight: 900;
+  height: 48px;
+  justify-content: center;
+  width: 48px;
+}
+
+.data-table {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  overflow: hidden;
+}
+
+.table-head,
+.table-row {
+  display: grid;
+  gap: 12px;
+  padding: 12px 14px;
+}
+
+.requirements-table .table-head,
+.requirements-table .table-row {
+  grid-template-columns: minmax(180px, 1.4fr) minmax(150px, 1fr) 90px 150px;
+}
+
+.team-table .table-head,
+.team-table .table-row {
+  grid-template-columns: minmax(150px, 1.3fr) 120px repeat(4, minmax(80px, 1fr));
+}
+
+.table-head {
+  background: #eef3f1;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.table-row {
+  align-items: center;
+  border-top: 1px solid var(--line);
+}
+
+.table-row small {
+  color: var(--muted);
+  display: block;
+  margin-top: 2px;
+}
+
+.candidate-grid {
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+}
+
+.candidate-card {
+  align-items: center;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr) 150px;
+  min-height: 106px;
+  padding: 14px;
+}
+
+.candidate-card strong,
+.candidate-card span,
+.candidate-card small {
+  display: block;
+}
+
+.client-card {
+  align-items: center;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(230px, 1.4fr) minmax(150px, 0.8fr) minmax(140px, 0.7fr);
+  min-height: 100px;
+  padding: 16px;
+}
+
+.client-card h3 {
+  font-size: 18px;
+  margin-top: 8px;
+}
+
+.client-card p {
+  margin: 5px 0 0;
+}
+
+.client-card strong,
+.client-card span {
+  display: block;
+}
+
+.attendance {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 800;
+  height: 30px;
+  justify-content: center;
+  padding: 6px 10px;
+  width: fit-content;
+}
+
+.attendance.on-time {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.attendance.late {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.attendance.absent {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.report-card {
+  padding: 14px;
+}
+
+.report-card header {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.report-card p {
+  margin: 10px 0;
+}
+
+.report-card small {
+  display: block;
+  margin-top: 4px;
+}
+
+@media (max-width: 1120px) {
+  .app-shell {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    height: auto;
+    position: relative;
+  }
+
+  .nav-list {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+  }
+
+  .nav-button {
+    grid-template-columns: 1fr;
+    justify-items: center;
+    text-align: center;
+  }
+
+  .owner-panel {
+    margin-top: 0;
+  }
+
+  .metric-grid {
+    grid-template-columns: repeat(3, minmax(140px, 1fr));
+  }
+
+  .board-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 720px) {
+  .workspace,
+  .sidebar {
+    padding: 16px;
+  }
+
+  .topbar,
+  .topbar-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .metric-grid,
+  .candidate-grid,
+  .nav-list {
+    grid-template-columns: 1fr;
+  }
+
+  .follow-row,
+  .client-card,
+  .candidate-card,
+  .requirements-table .table-head,
+  .requirements-table .table-row,
+  .team-table .table-head,
+  .team-table .table-row {
+    grid-template-columns: 1fr;
+  }
+
+  .table-head {
+    display: none;
+  }
+}

@@ -1,0 +1,1 @@
+CREATE INDEX `office_state_updated_at_idx` ON `office_state` (`updated_at`);
