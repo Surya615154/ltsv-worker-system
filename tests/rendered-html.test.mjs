@@ -18,6 +18,9 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /Today Command Board/);
   assert.match(app, /Staff Discipline Sheet/);
   assert.match(app, /Candidate Tracker/);
+  assert.match(app, /Invoice and Payment Tracker/);
+  assert.match(app, /Quick Staff Update/);
+  assert.match(app, /Agreement Sent/);
   assert.match(css, /\.metric-grid/);
   assert.doesNotMatch(app + layout + css, /Your site is taking shape|Codex is working|codex-preview/);
 });

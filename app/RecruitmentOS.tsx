@@ -22,7 +22,15 @@ type Client = {
   contact: string;
   city: string;
   industry: string;
-  status: "Prospect" | "Agreement" | "Active" | "Payment";
+  status:
+    | "Prospect"
+    | "Permission"
+    | "Meeting"
+    | "Agreement"
+    | "Agreement Sent"
+    | "Agreement Signed"
+    | "Active"
+    | "Payment";
   model: string;
   owner: string;
   nextFollowUp: string;
@@ -88,6 +96,16 @@ type DailyReport = {
   tomorrow: string;
 };
 
+type Invoice = {
+  id: string;
+  company: string;
+  candidate: string;
+  amount: number;
+  owner: string;
+  status: "Draft" | "Sent" | "Payment Pending" | "Paid";
+  due: string;
+};
+
 type OfficeState = {
   members: Member[];
   clients: Client[];
@@ -95,6 +113,7 @@ type OfficeState = {
   candidates: Candidate[];
   followUps: FollowUp[];
   reports: DailyReport[];
+  invoices: Invoice[];
 };
 
 const seedState: OfficeState = {
@@ -213,7 +232,7 @@ const seedState: OfficeState = {
       contact: "HR / Operations",
       city: "Nashik",
       industry: "Pharma / Biotech",
-      status: "Agreement",
+      status: "Agreement Sent",
       model: "60% One Month Salary",
       owner: "Vishwatej Suryawanshi",
       nextFollowUp: "This week",
@@ -317,6 +336,26 @@ const seedState: OfficeState = {
       tomorrow: "Push agreement follow-up and schedule one client meeting",
     },
   ],
+  invoices: [
+    {
+      id: "i1",
+      company: "Press Metal Industries",
+      candidate: "Sample Candidate 1",
+      amount: 12500,
+      owner: "Rohan Dongre",
+      status: "Draft",
+      due: "After joining",
+    },
+    {
+      id: "i2",
+      company: "NMD",
+      candidate: "Joining batch",
+      amount: 18000,
+      owner: "Sagar Sonawane",
+      status: "Payment Pending",
+      due: "This week",
+    },
+  ],
 };
 
 const stages: Candidate["stage"][] = [
@@ -343,6 +382,23 @@ const requirementStatuses: Requirement["status"][] = [
   "Joined",
   "Invoice",
   "Closed",
+];
+
+const clientStatuses: Client["status"][] = [
+  "Prospect",
+  "Permission",
+  "Meeting",
+  "Agreement Sent",
+  "Agreement Signed",
+  "Active",
+  "Payment",
+];
+
+const invoiceStatuses: Invoice["status"][] = [
+  "Draft",
+  "Sent",
+  "Payment Pending",
+  "Paid",
 ];
 
 function makeId(prefix: string) {
@@ -375,10 +431,30 @@ function isLegacyDemoData(payload: OfficeState) {
   );
 }
 
+function normalizeOfficeState(payload: OfficeState): OfficeState {
+  const clients = payload.clients?.length ? payload.clients : seedState.clients;
+
+  return {
+    members: payload.members?.length ? payload.members : seedState.members,
+    clients: clients.map((client) => ({
+      ...client,
+      status: client.status === "Agreement" ? "Agreement Sent" : client.status,
+    })),
+    requirements: payload.requirements?.length
+      ? payload.requirements
+      : seedState.requirements,
+    candidates: payload.candidates?.length ? payload.candidates : seedState.candidates,
+    followUps: payload.followUps?.length ? payload.followUps : seedState.followUps,
+    reports: payload.reports?.length ? payload.reports : seedState.reports,
+    invoices: payload.invoices?.length ? payload.invoices : seedState.invoices,
+  };
+}
+
 export default function RecruitmentOS() {
   const [state, setState] = useState<OfficeState>(seedState);
   const [activeView, setActiveView] = useState("Control");
   const [saveStatus, setSaveStatus] = useState("Ready");
+  const [activeMemberId, setActiveMemberId] = useState("m3");
 
   useEffect(() => {
     let cancelled = false;
@@ -388,7 +464,7 @@ export default function RecruitmentOS() {
         if (!response.ok) return;
         const payload = (await response.json()) as OfficeState;
         if (!cancelled && hasOfficeData(payload) && !isLegacyDemoData(payload)) {
-          setState(payload);
+          setState(normalizeOfficeState(payload));
         }
       } catch {
         setSaveStatus("Offline sample mode");
@@ -418,6 +494,13 @@ export default function RecruitmentOS() {
     return () => window.clearTimeout(handle);
   }, [state]);
 
+  const activeMember = useMemo(
+    () =>
+      state.members.find((member) => member.id === activeMemberId) ??
+      state.members[0],
+    [activeMemberId, state.members],
+  );
+
   const metrics = useMemo(() => {
     const openRequirements = state.requirements.filter(
       (item) => item.status !== "Closed",
@@ -429,6 +512,9 @@ export default function RecruitmentOS() {
       ["Interview Scheduled", "Interview Done"].includes(item.stage),
     ).length;
     const joined = state.candidates.filter((item) => item.stage === "Joined").length;
+    const pendingInvoices = state.invoices.filter(
+      (item) => item.status !== "Paid",
+    );
     const discipline =
       state.members.reduce((sum, member) => sum + scoreMember(member), 0) /
       Math.max(state.members.length, 1);
@@ -441,6 +527,8 @@ export default function RecruitmentOS() {
       joined,
       discipline: Math.round(discipline),
       activeClients: state.clients.filter((item) => item.status === "Active").length,
+      pendingInvoices: pendingInvoices.length,
+      pendingAmount: pendingInvoices.reduce((sum, item) => sum + item.amount, 0),
     };
   }, [state]);
 
@@ -462,6 +550,26 @@ export default function RecruitmentOS() {
           nextFollowUp: String(form.get("nextFollowUp") || "Tomorrow"),
         },
         ...current.clients,
+      ],
+    }));
+    event.currentTarget.reset();
+  }
+
+  function addFollowUp(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setState((current) => ({
+      ...current,
+      followUps: [
+        {
+          id: makeId("follow"),
+          type: String(form.get("type") || "Client") as FollowUp["type"],
+          title: String(form.get("title") || "New follow-up"),
+          owner: String(form.get("owner") || activeMember?.name || "Team"),
+          due: String(form.get("due") || "Today"),
+          status: "Pending",
+        },
+        ...current.followUps,
       ],
     }));
     event.currentTarget.reset();
@@ -549,6 +657,66 @@ export default function RecruitmentOS() {
     }));
   }
 
+  function updateClientStatus(id: string, status: Client["status"]) {
+    setState((current) => ({
+      ...current,
+      clients: current.clients.map((item) =>
+        item.id === id ? { ...item, status } : item,
+      ),
+    }));
+  }
+
+  function updateInvoiceStatus(id: string, status: Invoice["status"]) {
+    setState((current) => ({
+      ...current,
+      invoices: current.invoices.map((item) =>
+        item.id === id ? { ...item, status } : item,
+      ),
+    }));
+  }
+
+  function addInvoice(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setState((current) => ({
+      ...current,
+      invoices: [
+        {
+          id: makeId("invoice"),
+          company: String(form.get("company") || "Client"),
+          candidate: String(form.get("candidate") || "Candidate"),
+          amount: Number(form.get("amount") || 0),
+          owner: String(form.get("owner") || activeMember?.name || "Team"),
+          status: "Draft",
+          due: String(form.get("due") || "This week"),
+        },
+        ...current.invoices,
+      ],
+    }));
+    event.currentTarget.reset();
+  }
+
+  function quickUpdate(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const memberId = String(form.get("member") || activeMemberId);
+    const attendance = String(form.get("attendance") || "On time") as Member["attendance"];
+    setState((current) => ({
+      ...current,
+      members: current.members.map((member) =>
+        member.id === memberId
+          ? {
+              ...member,
+              attendance,
+              calls: Number(form.get("calls") || member.calls),
+              cv: Number(form.get("cv") || member.cv),
+              interviews: Number(form.get("interviews") || member.interviews),
+            }
+          : member,
+      ),
+    }));
+  }
+
   function toggleFollowUp(id: string) {
     setState((current) => ({
       ...current,
@@ -576,7 +744,7 @@ export default function RecruitmentOS() {
         </div>
 
         <nav className="nav-list">
-          {["Control", "Pipeline", "Clients", "Team", "Reports"].map((view) => (
+          {["Control", "Pipeline", "Clients", "Team", "Money", "Reports"].map((view) => (
             <button
               className={activeView === view ? "nav-button active" : "nav-button"}
               key={view}
@@ -604,12 +772,16 @@ export default function RecruitmentOS() {
             <span className="brand-subline">We get to opportunity</span>
           </div>
           <div className="topbar-actions">
-            <select aria-label="Viewing role">
-              <option>Boss / Director</option>
-              <option>HR Head / Admin</option>
-              <option>BDO</option>
-              <option>Recruiter</option>
-              <option>Coordinator</option>
+            <select
+              aria-label="Working as"
+              value={activeMember?.id}
+              onChange={(event) => setActiveMemberId(event.target.value)}
+            >
+              {state.members.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name} - {member.role}
+                </option>
+              ))}
             </select>
             <button type="button" onClick={() => setActiveView("Reports")}>
               Add Daily Report
@@ -625,7 +797,7 @@ export default function RecruitmentOS() {
               <Metric label="Interviews" value={metrics.interviews} detail="scheduled/done" />
               <Metric label="Today follow-ups" value={metrics.todayFollowUps} detail="pending only" />
               <Metric label="Joinings" value={metrics.joined} detail="confirmed records" />
-              <Metric label="Discipline" value={`${metrics.discipline}%`} detail="activity vs target" />
+              <Metric label="Pending invoices" value={metrics.pendingInvoices} detail={`Rs ${metrics.pendingAmount.toLocaleString("en-IN")}`} />
             </section>
 
             <section className="board-grid">
@@ -656,11 +828,30 @@ export default function RecruitmentOS() {
                       <div>
                         <strong>{member.name}</strong>
                         <span>{member.role} / {member.desk}</span>
+                        <div className="progress-line" aria-hidden="true">
+                          <i style={{ width: `${scoreMember(member)}%` }} />
+                        </div>
                       </div>
                       <div className="score-ring">{scoreMember(member)}%</div>
                     </div>
                   ))}
                 </div>
+              </div>
+
+              <div className="panel wide">
+                <PanelHeader title="Add Follow-up" label="Create work, assign owner" />
+                <form className="form-grid" onSubmit={addFollowUp}>
+                  <select name="type" aria-label="Follow-up type">
+                    <option>Client</option>
+                    <option>Candidate</option>
+                    <option>Payment</option>
+                    <option>Joining</option>
+                  </select>
+                  <input name="title" placeholder="Follow-up work" />
+                  <input name="owner" placeholder="Owner" defaultValue={activeMember?.name} />
+                  <input name="due" placeholder="Due date/time" defaultValue="Today" />
+                  <button type="submit">Add Follow-up</button>
+                </form>
               </div>
             </section>
           </>
@@ -770,6 +961,17 @@ export default function RecruitmentOS() {
                     <div>
                       <strong>{client.owner}</strong>
                       <span>{client.nextFollowUp}</span>
+                      <select
+                        aria-label={`Client status for ${client.company}`}
+                        value={client.status}
+                        onChange={(event) =>
+                          updateClientStatus(client.id, event.target.value as Client["status"])
+                        }
+                      >
+                        {clientStatuses.map((status) => (
+                          <option key={status}>{status}</option>
+                        ))}
+                      </select>
                     </div>
                   </article>
                 ))}
@@ -828,6 +1030,28 @@ export default function RecruitmentOS() {
             </div>
 
             <div className="panel">
+              <PanelHeader title="Quick Staff Update" label="Attendance and target" />
+              <form className="form-stack" onSubmit={quickUpdate}>
+                <select name="member" aria-label="Staff member" defaultValue={activeMember?.id}>
+                  {state.members.map((member) => (
+                    <option key={member.id} value={member.id}>
+                      {member.name}
+                    </option>
+                  ))}
+                </select>
+                <select name="attendance" aria-label="Attendance">
+                  <option>On time</option>
+                  <option>Late</option>
+                  <option>Absent</option>
+                </select>
+                <input name="calls" placeholder="Calls completed" type="number" min="0" />
+                <input name="cv" placeholder="CVs / applications" type="number" min="0" />
+                <input name="interviews" placeholder="Interviews scheduled" type="number" min="0" />
+                <button type="submit">Update Staff</button>
+              </form>
+            </div>
+
+            <div className="panel wide">
               <PanelHeader title="Role Playbook" label="Who does what" />
               <div className="role-list">
               {state.members.map((member) => (
@@ -839,6 +1063,57 @@ export default function RecruitmentOS() {
                 </article>
               ))}
               </div>
+            </div>
+          </section>
+        )}
+
+        {activeView === "Money" && (
+          <section className="board-grid">
+            <div className="panel wide">
+              <PanelHeader title="Invoice and Payment Tracker" label="Joining to collection" />
+              <div className="data-table money-table">
+                <div className="table-head">
+                  <span>Client</span>
+                  <span>Candidate</span>
+                  <span>Amount</span>
+                  <span>Owner</span>
+                  <span>Status</span>
+                </div>
+                {state.invoices.map((invoice) => (
+                  <div className="table-row" key={invoice.id}>
+                    <span>
+                      <strong>{invoice.company}</strong>
+                      <small>{invoice.due}</small>
+                    </span>
+                    <span>{invoice.candidate}</span>
+                    <span>Rs {invoice.amount.toLocaleString("en-IN")}</span>
+                    <span>{invoice.owner}</span>
+                    <select
+                      aria-label={`Invoice status for ${invoice.company}`}
+                      value={invoice.status}
+                      onChange={(event) =>
+                        updateInvoiceStatus(invoice.id, event.target.value as Invoice["status"])
+                      }
+                    >
+                      {invoiceStatuses.map((status) => (
+                        <option key={status}>{status}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="panel">
+              <PanelHeader title="Create Invoice Entry" label="After joining" />
+              <form className="form-stack" onSubmit={addInvoice}>
+                <input name="company" placeholder="Client company" />
+                <input name="candidate" placeholder="Candidate / joining batch" />
+                <input name="amount" placeholder="Invoice amount" type="number" min="0" />
+                <input name="owner" placeholder="Owner" defaultValue={activeMember?.name} />
+                <input name="due" placeholder="Due / payment follow-up" />
+                <button type="submit">Add Invoice</button>
+              </form>
             </div>
           </section>
         )}

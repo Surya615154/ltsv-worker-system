@@ -203,7 +203,8 @@ button {
 }
 
 .topbar-actions button,
-.form-stack button {
+.form-stack button,
+.form-grid button {
   background: var(--green);
   border: 0;
   border-radius: 8px;
@@ -304,10 +305,15 @@ textarea {
 .client-list,
 .report-list,
 .form-stack,
+.form-grid,
 .candidate-grid,
 .role-list {
   display: grid;
   gap: 10px;
+}
+
+.form-grid {
+  grid-template-columns: 140px minmax(220px, 1fr) minmax(170px, 0.7fr) minmax(130px, 0.6fr) 140px;
 }
 
 .follow-row {
@@ -501,6 +507,39 @@ textarea {
   display: block;
 }
 
+.client-card select {
+  margin-top: 8px;
+}
+
+.money-table .table-head,
+.money-table .table-row {
+  grid-template-columns: minmax(170px, 1.1fr) minmax(140px, 0.9fr) 110px minmax(130px, 0.8fr) 160px;
+}
+
+.team-table .table-row span:last-child {
+  font-weight: 900;
+}
+
+.team-stack .member-line {
+  gap: 14px;
+}
+
+.progress-line {
+  background: #edf3f1;
+  border-radius: 999px;
+  height: 5px;
+  margin-top: 10px;
+  overflow: hidden;
+  width: min(190px, 100%);
+}
+
+.progress-line i {
+  background: var(--green);
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+}
+
 .attendance {
   border-radius: 999px;
   display: inline-flex;
@@ -557,7 +596,7 @@ textarea {
   }
 
   .nav-list {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
   .nav-button {
@@ -598,12 +637,15 @@ textarea {
   }
 
   .follow-row,
+  .form-grid,
   .client-card,
   .candidate-card,
   .requirements-table .table-head,
   .requirements-table .table-row,
   .team-table .table-head,
-  .team-table .table-row {
+  .team-table .table-row,
+  .money-table .table-head,
+  .money-table .table-row {
     grid-template-columns: 1fr;
   }
 
