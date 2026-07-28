@@ -365,6 +365,16 @@ function hasOfficeData(payload: OfficeState) {
   );
 }
 
+function isLegacyDemoData(payload: OfficeState) {
+  const memberNames = payload.members.map((member) => member.name).join(" ");
+  const clientNames = payload.clients.map((client) => client.company).join(" ");
+
+  return (
+    /Aarav|Sneha|Vikram/.test(memberNames) ||
+    /Nashik Auto Components|Western Logistics Hub/.test(clientNames)
+  );
+}
+
 export default function RecruitmentOS() {
   const [state, setState] = useState<OfficeState>(seedState);
   const [activeView, setActiveView] = useState("Control");
@@ -377,7 +387,9 @@ export default function RecruitmentOS() {
         const response = await fetch("/api/state", { cache: "no-store" });
         if (!response.ok) return;
         const payload = (await response.json()) as OfficeState;
-        if (!cancelled && hasOfficeData(payload)) setState(payload);
+        if (!cancelled && hasOfficeData(payload) && !isLegacyDemoData(payload)) {
+          setState(payload);
+        }
       } catch {
         setSaveStatus("Offline sample mode");
       }
