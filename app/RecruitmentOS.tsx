@@ -116,6 +116,12 @@ type OfficeState = {
   invoices: Invoice[];
 };
 
+type LoginProfile = {
+  memberId: string;
+  pin: string;
+  access: string[];
+};
+
 const seedState: OfficeState = {
   members: [
     {
@@ -401,6 +407,41 @@ const invoiceStatuses: Invoice["status"][] = [
   "Paid",
 ];
 
+const loginProfiles: LoginProfile[] = [
+  {
+    memberId: "m1",
+    pin: "1001",
+    access: ["Control", "Pipeline", "Clients", "Team", "Money", "Reports"],
+  },
+  {
+    memberId: "m2",
+    pin: "1002",
+    access: ["Control", "Pipeline", "Clients", "Team", "Money", "Reports"],
+  },
+  {
+    memberId: "m3",
+    pin: "1003",
+    access: ["Control", "Pipeline", "Clients", "Money", "Reports"],
+  },
+  {
+    memberId: "m4",
+    pin: "1004",
+    access: ["Control", "Pipeline", "Money", "Reports"],
+  },
+  {
+    memberId: "m5",
+    pin: "1005",
+    access: ["Control", "Pipeline", "Reports"],
+  },
+  {
+    memberId: "m6",
+    pin: "1006",
+    access: ["Control", "Pipeline", "Reports"],
+  },
+];
+
+const defaultViews = ["Control", "Pipeline", "Clients", "Team", "Money", "Reports"];
+
 function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.round(Math.random() * 1000)}`;
 }
@@ -455,6 +496,10 @@ export default function RecruitmentOS() {
   const [activeView, setActiveView] = useState("Control");
   const [saveStatus, setSaveStatus] = useState("Ready");
   const [activeMemberId, setActiveMemberId] = useState("m3");
+  const [loginMemberId, setLoginMemberId] = useState("m3");
+  const [loggedInMemberId, setLoggedInMemberId] = useState<string | null>(null);
+  const [loginPin, setLoginPin] = useState("");
+  const [loginError, setLoginError] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -474,6 +519,15 @@ export default function RecruitmentOS() {
     return () => {
       cancelled = true;
     };
+  }, []);
+
+  useEffect(() => {
+    const savedMemberId = window.sessionStorage.getItem("ltsv-login-member");
+    if (savedMemberId && loginProfiles.some((profile) => profile.memberId === savedMemberId)) {
+      setLoggedInMemberId(savedMemberId);
+      setActiveMemberId(savedMemberId);
+      setLoginMemberId(savedMemberId);
+    }
   }, []);
 
   useEffect(() => {
@@ -500,6 +554,26 @@ export default function RecruitmentOS() {
       state.members[0],
     [activeMemberId, state.members],
   );
+
+  const loggedInMember = useMemo(
+    () =>
+      state.members.find((member) => member.id === loggedInMemberId) ??
+      state.members.find((member) => member.id === loginMemberId),
+    [loginMemberId, loggedInMemberId, state.members],
+  );
+
+  const loggedInProfile = useMemo(
+    () => loginProfiles.find((profile) => profile.memberId === loggedInMemberId),
+    [loggedInMemberId],
+  );
+
+  const visibleViews = loggedInProfile?.access ?? defaultViews;
+
+  useEffect(() => {
+    if (!visibleViews.includes(activeView)) {
+      setActiveView(visibleViews[0] ?? "Control");
+    }
+  }, [activeView, visibleViews]);
 
   const metrics = useMemo(() => {
     const openRequirements = state.requirements.filter(
@@ -717,6 +791,33 @@ export default function RecruitmentOS() {
     }));
   }
 
+  function login(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const profile = loginProfiles.find(
+      (item) => item.memberId === loginMemberId && item.pin === loginPin,
+    );
+
+    if (!profile) {
+      setLoginError("Wrong PIN. Check your name and try again.");
+      return;
+    }
+
+    setLoggedInMemberId(profile.memberId);
+    setActiveMemberId(profile.memberId);
+    setActiveView(profile.access[0] ?? "Control");
+    setLoginPin("");
+    setLoginError("");
+    window.sessionStorage.setItem("ltsv-login-member", profile.memberId);
+  }
+
+  function logout() {
+    window.sessionStorage.removeItem("ltsv-login-member");
+    setLoggedInMemberId(null);
+    setLoginPin("");
+    setLoginError("");
+    setActiveView("Control");
+  }
+
   function toggleFollowUp(id: string) {
     setState((current) => ({
       ...current,
@@ -726,6 +827,49 @@ export default function RecruitmentOS() {
           : item,
       ),
     }));
+  }
+
+  if (!loggedInMemberId) {
+    return (
+      <main className="login-shell">
+        <section className="login-card">
+          <img
+            alt="Life Time Success Vision logo"
+            className="login-logo"
+            src="/ltsv-logo.png"
+          />
+          <p className="eyebrow">Life Time Success Vision</p>
+          <h1>Staff Login</h1>
+          <p className="login-copy">
+            Select your name and enter your office PIN to open your work dashboard.
+          </p>
+          <form className="form-stack" onSubmit={login}>
+            <select
+              aria-label="Staff name"
+              value={loginMemberId}
+              onChange={(event) => setLoginMemberId(event.target.value)}
+            >
+              {seedState.members.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name} - {member.role}
+                </option>
+              ))}
+            </select>
+            <input
+              aria-label="PIN"
+              inputMode="numeric"
+              maxLength={4}
+              onChange={(event) => setLoginPin(event.target.value)}
+              placeholder="4 digit PIN"
+              type="password"
+              value={loginPin}
+            />
+            {loginError && <span className="login-error">{loginError}</span>}
+            <button type="submit">Login</button>
+          </form>
+        </section>
+      </main>
+    );
   }
 
   return (
@@ -744,7 +888,7 @@ export default function RecruitmentOS() {
         </div>
 
         <nav className="nav-list">
-          {["Control", "Pipeline", "Clients", "Team", "Money", "Reports"].map((view) => (
+          {visibleViews.map((view) => (
             <button
               className={activeView === view ? "nav-button active" : "nav-button"}
               key={view}
@@ -758,6 +902,15 @@ export default function RecruitmentOS() {
         </nav>
 
         <div className="owner-panel">
+          <p className="eyebrow">Logged In</p>
+          <strong>{loggedInMember?.name}</strong>
+          <span>{loggedInMember?.role}</span>
+          <button className="ghost-button" onClick={logout} type="button">
+            Logout
+          </button>
+        </div>
+
+        <div className="owner-panel compact">
           <p className="eyebrow">Boss View</p>
           <strong>{metrics.discipline}% discipline score</strong>
           <span>{saveStatus}</span>
@@ -776,6 +929,7 @@ export default function RecruitmentOS() {
               aria-label="Working as"
               value={activeMember?.id}
               onChange={(event) => setActiveMemberId(event.target.value)}
+              disabled={loggedInMember?.role !== "Director / Owner"}
             >
               {state.members.map((member) => (
                 <option key={member.id} value={member.id}>

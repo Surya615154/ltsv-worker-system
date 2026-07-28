@@ -14,6 +14,9 @@ test("contains the recruitment office operating system", async () => {
   assert.match(layout, /title:\s*"Life Time Success Vision"/);
   assert.match(layout, /\/ltsv-logo\.png/);
   assert.match(app, /Life Time Success Vision/);
+  assert.match(app, /Staff Login/);
+  assert.match(app, /Wrong PIN/);
+  assert.match(app, /Logout/);
   assert.match(app, /Office Control/);
   assert.match(app, /Today Command Board/);
   assert.match(app, /Staff Discipline Sheet/);

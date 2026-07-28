@@ -52,6 +52,62 @@ button {
   cursor: pointer;
 }
 
+.login-shell {
+  align-items: center;
+  background:
+    linear-gradient(140deg, rgba(23, 52, 47, 0.92), rgba(18, 35, 31, 0.78)),
+    url("/ltsv-logo.png");
+  background-position: center;
+  background-size: min(720px, 92vw);
+  display: grid;
+  justify-items: center;
+  min-height: 100vh;
+  padding: 18px;
+}
+
+.login-card {
+  background: rgba(255, 255, 255, 0.96);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 8px;
+  box-shadow: 0 26px 90px rgba(0, 0, 0, 0.22);
+  max-width: 420px;
+  padding: 28px;
+  width: 100%;
+}
+
+.login-logo {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  display: block;
+  height: 78px;
+  margin-bottom: 18px;
+  object-fit: cover;
+  width: 78px;
+}
+
+.login-card h1 {
+  font-size: 38px;
+  line-height: 1;
+  margin: 0;
+}
+
+.login-copy {
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 12px 0 22px;
+}
+
+.login-error {
+  background: var(--red-soft);
+  border-radius: 8px;
+  color: var(--red);
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  padding: 10px 12px;
+}
+
 .app-shell {
   display: grid;
   grid-template-columns: 292px minmax(0, 1fr);
@@ -155,6 +211,10 @@ button {
   padding: 16px;
 }
 
+.owner-panel.compact strong {
+  font-size: 22px;
+}
+
 .owner-panel strong,
 .owner-panel span {
   display: block;
@@ -168,6 +228,18 @@ button {
 .owner-panel span {
   color: #c7d9d4;
   font-size: 13px;
+}
+
+.ghost-button {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  border-radius: 8px;
+  color: #f8fbf9;
+  font-weight: 800;
+  min-height: 38px;
+  margin-top: 14px;
+  padding: 0 12px;
+  width: 100%;
 }
 
 .workspace {
