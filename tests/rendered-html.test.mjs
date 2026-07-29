@@ -30,7 +30,7 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /Attendance code/);
   assert.match(app, /Personal access only/);
   assert.match(app, /My Task Access/);
-  assert.match(app, /qr-attendance/);
+  assert.match(app, /attendance=qr/);
   assert.match(app, /Wrong code/);
   assert.match(app, /Logout/);
   assert.match(app, /Office Control/);

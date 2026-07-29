@@ -3,9 +3,9 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 const attendanceQrLink =
-  "https://ltsv-worker-system.suryawanshivishal625.chatgpt.site/#qr-attendance";
+  "https://ltsv-worker-system.suryawanshivishal625.chatgpt.site/?attendance=qr";
 const attendanceQrImage =
-  "https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=16&data=https%3A%2F%2Fltsv-worker-system.suryawanshivishal625.chatgpt.site%2F%23qr-attendance";
+  "https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=16&data=https%3A%2F%2Fltsv-worker-system.suryawanshivishal625.chatgpt.site%2F%3Fattendance%3Dqr";
 const officeStartTime = "10:00";
 
 type Member = {
