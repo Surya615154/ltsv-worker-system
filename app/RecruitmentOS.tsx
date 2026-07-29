@@ -106,6 +106,27 @@ type Invoice = {
   due: string;
 };
 
+type Task = {
+  id: string;
+  title: string;
+  owner: string;
+  assignedBy: string;
+  due: string;
+  priority: "High" | "Medium" | "Low";
+  status: "Assigned" | "In Progress" | "Blocked" | "Done";
+  notes: string;
+};
+
+type AttendanceLog = {
+  id: string;
+  member: string;
+  date: string;
+  checkIn: string;
+  checkOut: string;
+  status: "On time" | "Late" | "Absent" | "Half day";
+  lateMinutes: number;
+};
+
 type OfficeState = {
   members: Member[];
   clients: Client[];
@@ -114,6 +135,8 @@ type OfficeState = {
   followUps: FollowUp[];
   reports: DailyReport[];
   invoices: Invoice[];
+  tasks: Task[];
+  attendanceLogs: AttendanceLog[];
 };
 
 type LoginProfile = {
@@ -362,6 +385,67 @@ const seedState: OfficeState = {
       due: "This week",
     },
   ],
+  tasks: [
+    {
+      id: "t1",
+      title: "Confirm Press Metal interview batch",
+      owner: "Rohan Dongre",
+      assignedBy: "Sagar Sonawane",
+      due: "Today 3:00 PM",
+      priority: "High",
+      status: "In Progress",
+      notes: "Candidate calls and timing confirmation before client update.",
+    },
+    {
+      id: "t2",
+      title: "Schedule Biolaxi agreement follow-up",
+      owner: "Vishwatej Suryawanshi",
+      assignedBy: "Sagar Sonawane",
+      due: "Today",
+      priority: "High",
+      status: "Assigned",
+      notes: "Move from agreement sent to agreement signed.",
+    },
+    {
+      id: "t3",
+      title: "Collect 20 fresh application entries",
+      owner: "Laxmi",
+      assignedBy: "Sonali Shingre Ma'am",
+      due: "Today 5:00 PM",
+      priority: "Medium",
+      status: "Assigned",
+      notes: "Focus on production/helper roles.",
+    },
+  ],
+  attendanceLogs: [
+    {
+      id: "a1",
+      member: "Sagar Sonawane",
+      date: new Date().toISOString().slice(0, 10),
+      checkIn: "09:50",
+      checkOut: "",
+      status: "On time",
+      lateMinutes: 0,
+    },
+    {
+      id: "a2",
+      member: "Vishwatej Suryawanshi",
+      date: new Date().toISOString().slice(0, 10),
+      checkIn: "09:58",
+      checkOut: "",
+      status: "On time",
+      lateMinutes: 0,
+    },
+    {
+      id: "a3",
+      member: "Rohan Dongre",
+      date: new Date().toISOString().slice(0, 10),
+      checkIn: "10:11",
+      checkOut: "",
+      status: "Late",
+      lateMinutes: 11,
+    },
+  ],
 };
 
 const stages: Candidate["stage"][] = [
@@ -407,40 +491,80 @@ const invoiceStatuses: Invoice["status"][] = [
   "Paid",
 ];
 
+const taskStatuses: Task["status"][] = [
+  "Assigned",
+  "In Progress",
+  "Blocked",
+  "Done",
+];
+
 const loginProfiles: LoginProfile[] = [
   {
     memberId: "m1",
     pin: "1001",
-    access: ["Launch", "Control", "Pipeline", "Clients", "Team", "Money", "Reports"],
+    access: [
+      "Launch",
+      "CEO",
+      "Control",
+      "Pipeline",
+      "Clients",
+      "Team",
+      "Tasks",
+      "Attendance",
+      "Money",
+      "Reports",
+    ],
   },
   {
     memberId: "m2",
     pin: "1002",
-    access: ["Launch", "Control", "Pipeline", "Clients", "Team", "Money", "Reports"],
+    access: [
+      "Launch",
+      "CEO",
+      "Control",
+      "Pipeline",
+      "Clients",
+      "Team",
+      "Tasks",
+      "Attendance",
+      "Money",
+      "Reports",
+    ],
   },
   {
     memberId: "m3",
     pin: "1003",
-    access: ["Launch", "Control", "Pipeline", "Clients", "Money", "Reports"],
+    access: ["Launch", "Control", "Pipeline", "Clients", "Tasks", "Attendance", "Money", "Reports"],
   },
   {
     memberId: "m4",
     pin: "1004",
-    access: ["Launch", "Control", "Pipeline", "Money", "Reports"],
+    access: ["Launch", "Control", "Pipeline", "Tasks", "Attendance", "Money", "Reports"],
   },
   {
     memberId: "m5",
     pin: "1005",
-    access: ["Launch", "Control", "Pipeline", "Reports"],
+    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Reports"],
   },
   {
     memberId: "m6",
     pin: "1006",
-    access: ["Launch", "Control", "Pipeline", "Reports"],
+    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Reports"],
   },
 ];
 
-const defaultViews = ["Launch", "Control", "Pipeline", "Clients", "Team", "Money", "Reports"];
+const defaultViews = [
+  "Launch",
+  "CEO",
+  "Control",
+  "Pipeline",
+  "Clients",
+  "Team",
+  "Tasks",
+  "Attendance",
+  "Money",
+  "Reports",
+];
 
 const launchChecklist = [
   "Every staff member logs in from their own phone before work starts.",
@@ -449,6 +573,7 @@ const launchChecklist = [
   "Recruiter and coordinators update candidate stages before evening review.",
   "All staff submit the Daily Report before leaving office.",
   "Invoice/payment status is reviewed after every joining confirmation.",
+  "Sagar sir reviews CEO dashboard before closing the office day.",
 ];
 
 const operatingRhythm = [
@@ -513,6 +638,10 @@ function normalizeOfficeState(payload: OfficeState): OfficeState {
     followUps: payload.followUps?.length ? payload.followUps : seedState.followUps,
     reports: payload.reports?.length ? payload.reports : seedState.reports,
     invoices: payload.invoices?.length ? payload.invoices : seedState.invoices,
+    tasks: payload.tasks?.length ? payload.tasks : seedState.tasks,
+    attendanceLogs: payload.attendanceLogs?.length
+      ? payload.attendanceLogs
+      : seedState.attendanceLogs,
   };
 }
 
@@ -614,6 +743,13 @@ export default function RecruitmentOS() {
     const pendingInvoices = state.invoices.filter(
       (item) => item.status !== "Paid",
     );
+    const openTasks = state.tasks.filter((item) => item.status !== "Done");
+    const blockedTasks = state.tasks.filter((item) => item.status === "Blocked");
+    const today = new Date().toISOString().slice(0, 10);
+    const todayAttendance = state.attendanceLogs.filter(
+      (item) => item.date === today,
+    );
+    const lateToday = todayAttendance.filter((item) => item.status === "Late");
     const discipline =
       state.members.reduce((sum, member) => sum + scoreMember(member), 0) /
       Math.max(state.members.length, 1);
@@ -628,8 +764,50 @@ export default function RecruitmentOS() {
       activeClients: state.clients.filter((item) => item.status === "Active").length,
       pendingInvoices: pendingInvoices.length,
       pendingAmount: pendingInvoices.reduce((sum, item) => sum + item.amount, 0),
+      openTasks: openTasks.length,
+      blockedTasks: blockedTasks.length,
+      attendanceMarked: todayAttendance.length,
+      lateToday: lateToday.length,
     };
   }, [state]);
+
+  const rankedMembers = useMemo(
+    () =>
+      [...state.members].sort(
+        (first, second) => scoreMember(second) - scoreMember(first),
+      ),
+    [state.members],
+  );
+
+  const riskItems = useMemo(
+    () => [
+      ...state.followUps
+        .filter((item) => item.status === "Pending")
+        .slice(0, 4)
+        .map((item) => ({
+          label: item.type,
+          title: item.title,
+          owner: item.owner,
+        })),
+      ...state.tasks
+        .filter((item) => item.status === "Blocked")
+        .slice(0, 3)
+        .map((item) => ({
+          label: "Blocked",
+          title: item.title,
+          owner: item.owner,
+        })),
+      ...state.invoices
+        .filter((item) => item.status === "Payment Pending")
+        .slice(0, 3)
+        .map((item) => ({
+          label: "Payment",
+          title: `${item.company} - Rs ${item.amount.toLocaleString("en-IN")}`,
+          owner: item.owner,
+        })),
+    ],
+    [state.followUps, state.invoices, state.tasks],
+  );
 
   function addClient(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -774,6 +952,15 @@ export default function RecruitmentOS() {
     }));
   }
 
+  function updateTaskStatus(id: string, status: Task["status"]) {
+    setState((current) => ({
+      ...current,
+      tasks: current.tasks.map((item) =>
+        item.id === id ? { ...item, status } : item,
+      ),
+    }));
+  }
+
   function addInvoice(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
@@ -791,6 +978,58 @@ export default function RecruitmentOS() {
         },
         ...current.invoices,
       ],
+    }));
+    event.currentTarget.reset();
+  }
+
+  function addTask(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setState((current) => ({
+      ...current,
+      tasks: [
+        {
+          id: makeId("task"),
+          title: String(form.get("title") || "New task"),
+          owner: String(form.get("owner") || activeMember?.name || "Team"),
+          assignedBy: loggedInMember?.name || "Sagar Sonawane",
+          due: String(form.get("due") || "Today"),
+          priority: String(form.get("priority") || "Medium") as Task["priority"],
+          status: "Assigned",
+          notes: String(form.get("notes") || ""),
+        },
+        ...current.tasks,
+      ],
+    }));
+    event.currentTarget.reset();
+  }
+
+  function markAttendance(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const memberName = String(form.get("member") || activeMember?.name);
+    const status = String(form.get("status") || "On time") as AttendanceLog["status"];
+    const today = new Date().toISOString().slice(0, 10);
+
+    setState((current) => ({
+      ...current,
+      attendanceLogs: [
+        {
+          id: makeId("att"),
+          member: memberName,
+          date: today,
+          checkIn: String(form.get("checkIn") || "10:00"),
+          checkOut: String(form.get("checkOut") || ""),
+          status,
+          lateMinutes: Number(form.get("lateMinutes") || 0),
+        },
+        ...current.attendanceLogs,
+      ],
+      members: current.members.map((member) =>
+        member.name === memberName && ["On time", "Late", "Absent"].includes(status)
+          ? { ...member, attendance: status as Member["attendance"] }
+          : member,
+      ),
     }));
     event.currentTarget.reset();
   }
@@ -1028,6 +1267,96 @@ export default function RecruitmentOS() {
                       <span aria-hidden="true">OK</span>
                       <strong>{rule}</strong>
                     </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </>
+        )}
+
+        {activeView === "CEO" && (
+          <>
+            <section className="metric-grid" aria-label="CEO metrics">
+              <Metric label="Discipline" value={`${metrics.discipline}%`} detail="team target score" />
+              <Metric label="Open tasks" value={metrics.openTasks} detail={`${metrics.blockedTasks} blocked`} />
+              <Metric label="Attendance" value={metrics.attendanceMarked} detail={`${metrics.lateToday} late today`} />
+              <Metric label="Active clients" value={metrics.activeClients} detail="live accounts" />
+              <Metric label="Open positions" value={metrics.totalPositions} detail="to be closed" />
+              <Metric label="Pending money" value={`Rs ${metrics.pendingAmount.toLocaleString("en-IN")}`} detail="not paid yet" />
+            </section>
+
+            <section className="ceo-grid">
+              <div className="panel wide">
+                <PanelHeader title="Performance Ranking" label="Target vs activity" />
+                <div className="ranking-list">
+                  {rankedMembers.map((member, index) => (
+                    <article className="ranking-row" key={member.id}>
+                      <span>{index + 1}</span>
+                      <div>
+                        <strong>{member.name}</strong>
+                        <small>{member.role} / {member.targetText}</small>
+                        <div className="progress-line wide-line" aria-hidden="true">
+                          <i style={{ width: `${scoreMember(member)}%` }} />
+                        </div>
+                      </div>
+                      <strong>{scoreMember(member)}%</strong>
+                    </article>
+                  ))}
+                </div>
+              </div>
+
+              <div className="panel">
+                <PanelHeader title="CEO Risk Queue" label="Needs decision" />
+                <div className="risk-list">
+                  {riskItems.length ? (
+                    riskItems.map((item) => (
+                      <article className="risk-card" key={`${item.label}-${item.title}`}>
+                        <span className="tag payment">{item.label}</span>
+                        <strong>{item.title}</strong>
+                        <small>{item.owner}</small>
+                      </article>
+                    ))
+                  ) : (
+                    <article className="risk-card">
+                      <span className="tag active">Clear</span>
+                      <strong>No major risk pending</strong>
+                      <small>Keep daily reporting strict.</small>
+                    </article>
+                  )}
+                </div>
+              </div>
+
+              <div className="panel wide">
+                <PanelHeader title="Business Movement" label="Client and vacancy health" />
+                <div className="pipeline-bars">
+                  {clientStatuses.map((status) => {
+                    const count = state.clients.filter((client) => client.status === status).length;
+                    return (
+                      <div className="pipeline-bar" key={status}>
+                        <span>{status}</span>
+                        <div aria-hidden="true">
+                          <i style={{ width: `${Math.min(100, count * 34)}%` }} />
+                        </div>
+                        <strong>{count}</strong>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="panel">
+                <PanelHeader title="CEO Closing Routine" label="Evening review" />
+                <div className="check-list">
+                  {[
+                    "Check late marks and weak target scores.",
+                    "Close or reassign blocked tasks.",
+                    "Review pending invoices and payment calls.",
+                    "Confirm tomorrow's top client and vacancy priorities.",
+                  ].map((item, index) => (
+                    <div className="check-row" key={item}>
+                      <span>{index + 1}</span>
+                      <strong>{item}</strong>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -1309,6 +1638,116 @@ export default function RecruitmentOS() {
                 </article>
               ))}
               </div>
+            </div>
+          </section>
+        )}
+
+        {activeView === "Tasks" && (
+          <section className="board-grid">
+            <div className="panel wide">
+              <PanelHeader title="Task Assignment Board" label="Boss to staff execution" />
+              <div className="data-table task-table">
+                <div className="table-head">
+                  <span>Task</span>
+                  <span>Owner</span>
+                  <span>Due</span>
+                  <span>Priority</span>
+                  <span>Status</span>
+                </div>
+                {state.tasks.map((task) => (
+                  <div className="table-row" key={task.id}>
+                    <span>
+                      <strong>{task.title}</strong>
+                      <small>{task.notes || `Assigned by ${task.assignedBy}`}</small>
+                    </span>
+                    <span>{task.owner}</span>
+                    <span>{task.due}</span>
+                    <span className={`priority ${task.priority.toLowerCase()}`}>{task.priority}</span>
+                    <select
+                      aria-label={`Task status for ${task.title}`}
+                      value={task.status}
+                      onChange={(event) =>
+                        updateTaskStatus(task.id, event.target.value as Task["status"])
+                      }
+                    >
+                      {taskStatuses.map((status) => (
+                        <option key={status}>{status}</option>
+                      ))}
+                    </select>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="panel">
+              <PanelHeader title="Assign Task" label="Owner, deadline, priority" />
+              <form className="form-stack" onSubmit={addTask}>
+                <input name="title" placeholder="Task title" />
+                <select name="owner" aria-label="Task owner" defaultValue={activeMember?.name}>
+                  {state.members.map((member) => (
+                    <option key={member.id}>{member.name}</option>
+                  ))}
+                </select>
+                <input name="due" placeholder="Due date/time" defaultValue="Today" />
+                <select name="priority" aria-label="Priority">
+                  <option>High</option>
+                  <option>Medium</option>
+                  <option>Low</option>
+                </select>
+                <textarea name="notes" placeholder="Notes / expected output" rows={3} />
+                <button type="submit">Assign Task</button>
+              </form>
+            </div>
+          </section>
+        )}
+
+        {activeView === "Attendance" && (
+          <section className="board-grid">
+            <div className="panel wide">
+              <PanelHeader title="Attendance and Late Mark" label="Daily discipline" />
+              <div className="data-table attendance-table">
+                <div className="table-head">
+                  <span>Staff</span>
+                  <span>Date</span>
+                  <span>In</span>
+                  <span>Out</span>
+                  <span>Status</span>
+                  <span>Late</span>
+                </div>
+                {state.attendanceLogs.map((log) => (
+                  <div className="table-row" key={log.id}>
+                    <span><strong>{log.member}</strong></span>
+                    <span>{log.date}</span>
+                    <span>{log.checkIn}</span>
+                    <span>{log.checkOut || "-"}</span>
+                    <span className={`attendance ${log.status.toLowerCase().replace(" ", "-")}`}>
+                      {log.status}
+                    </span>
+                    <span>{log.lateMinutes} min</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="panel">
+              <PanelHeader title="Mark Attendance" label="Phone check-in entry" />
+              <form className="form-stack" onSubmit={markAttendance}>
+                <select name="member" aria-label="Attendance member" defaultValue={activeMember?.name}>
+                  {state.members.map((member) => (
+                    <option key={member.id}>{member.name}</option>
+                  ))}
+                </select>
+                <input name="checkIn" placeholder="Check-in time, e.g. 09:55" />
+                <input name="checkOut" placeholder="Check-out time, optional" />
+                <select name="status" aria-label="Attendance status">
+                  <option>On time</option>
+                  <option>Late</option>
+                  <option>Absent</option>
+                  <option>Half day</option>
+                </select>
+                <input name="lateMinutes" placeholder="Late minutes" type="number" min="0" />
+                <button type="submit">Mark Attendance</button>
+              </form>
             </div>
           </section>
         )}

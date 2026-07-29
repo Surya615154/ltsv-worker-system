@@ -367,6 +367,12 @@ textarea {
   grid-template-columns: minmax(0, 1fr) minmax(300px, 0.8fr);
 }
 
+.ceo-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1.25fr) minmax(300px, 0.75fr);
+}
+
 .metric-card,
 .panel,
 .candidate-card,
@@ -439,7 +445,10 @@ textarea {
 .role-list,
 .check-list,
 .rhythm-list,
-.rule-grid {
+.rule-grid,
+.ranking-list,
+.risk-list,
+.pipeline-bars {
   display: grid;
   gap: 10px;
 }
@@ -508,6 +517,78 @@ textarea {
   height: 42px;
   justify-content: center;
   width: 42px;
+}
+
+.ranking-row {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 38px minmax(0, 1fr) 64px;
+  min-height: 78px;
+  padding: 12px;
+}
+
+.ranking-row > span {
+  align-items: center;
+  background: var(--green-soft);
+  border-radius: 8px;
+  color: var(--green);
+  display: flex;
+  font-weight: 900;
+  height: 38px;
+  justify-content: center;
+  width: 38px;
+}
+
+.ranking-row small,
+.risk-card small {
+  color: var(--muted);
+  display: block;
+  margin-top: 4px;
+}
+
+.wide-line {
+  width: min(360px, 100%);
+}
+
+.risk-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 9px;
+  padding: 12px;
+}
+
+.pipeline-bar {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 150px minmax(0, 1fr) 32px;
+}
+
+.pipeline-bar span {
+  color: var(--muted);
+  font-weight: 800;
+}
+
+.pipeline-bar div {
+  background: #edf3f1;
+  border-radius: 999px;
+  height: 10px;
+  overflow: hidden;
+}
+
+.pipeline-bar i {
+  background: var(--blue);
+  border-radius: inherit;
+  display: block;
+  height: 100%;
+}
+
+.pipeline-bar strong {
+  text-align: right;
 }
 
 .form-grid {
@@ -714,6 +795,41 @@ textarea {
   grid-template-columns: minmax(170px, 1.1fr) minmax(140px, 0.9fr) 110px minmax(130px, 0.8fr) 160px;
 }
 
+.task-table .table-head,
+.task-table .table-row {
+  grid-template-columns: minmax(220px, 1.4fr) minmax(140px, 0.8fr) 120px 92px 150px;
+}
+
+.attendance-table .table-head,
+.attendance-table .table-row {
+  grid-template-columns: minmax(160px, 1.1fr) 110px 80px 80px 110px 80px;
+}
+
+.priority {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  justify-content: center;
+  padding: 7px 10px;
+  width: fit-content;
+}
+
+.priority.high {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.priority.medium {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.priority.low {
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
 .team-table .table-row span:last-child {
   font-weight: 900;
 }
@@ -812,6 +928,7 @@ textarea {
   }
 
   .board-grid,
+  .ceo-grid,
   .launch-grid {
     grid-template-columns: 1fr;
   }
@@ -846,7 +963,12 @@ textarea {
   .team-table .table-head,
   .team-table .table-row,
   .money-table .table-head,
-  .money-table .table-row {
+  .money-table .table-row,
+  .task-table .table-head,
+  .task-table .table-row,
+  .attendance-table .table-head,
+  .attendance-table .table-row,
+  .pipeline-bar {
     grid-template-columns: 1fr;
   }
 

@@ -19,6 +19,10 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /Launch Checklist/);
   assert.match(app, /Office Rhythm/);
   assert.match(app, /Non-Negotiable Rules/);
+  assert.match(app, /Performance Ranking/);
+  assert.match(app, /CEO Risk Queue/);
+  assert.match(app, /Task Assignment Board/);
+  assert.match(app, /Attendance and Late Mark/);
   assert.match(app, /Wrong PIN/);
   assert.match(app, /Logout/);
   assert.match(app, /Office Control/);
