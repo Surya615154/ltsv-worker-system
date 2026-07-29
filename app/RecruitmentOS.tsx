@@ -507,7 +507,7 @@ const taskStatuses: Task["status"][] = [
 const loginProfiles: LoginProfile[] = [
   {
     memberId: "m1",
-    pin: "1001",
+    pin: "731942",
     access: [
       "Launch",
       "CEO",
@@ -523,38 +523,35 @@ const loginProfiles: LoginProfile[] = [
   },
   {
     memberId: "m2",
-    pin: "1002",
+    pin: "468215",
     access: [
       "Launch",
-      "CEO",
       "Control",
       "Pipeline",
-      "Clients",
       "Team",
       "Tasks",
       "Attendance",
-      "Money",
       "Reports",
     ],
   },
   {
     memberId: "m3",
-    pin: "1003",
-    access: ["Launch", "Control", "Pipeline", "Clients", "Tasks", "Attendance", "Money", "Reports"],
+    pin: "925684",
+    access: ["Launch", "Control", "Clients", "Tasks", "Attendance", "Reports"],
   },
   {
     memberId: "m4",
-    pin: "1004",
-    access: ["Launch", "Control", "Pipeline", "Tasks", "Attendance", "Money", "Reports"],
+    pin: "384761",
+    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Reports"],
   },
   {
     memberId: "m5",
-    pin: "1005",
+    pin: "617493",
     access: ["Launch", "Pipeline", "Tasks", "Attendance", "Reports"],
   },
   {
     memberId: "m6",
-    pin: "1006",
+    pin: "852136",
     access: ["Launch", "Pipeline", "Tasks", "Attendance", "Reports"],
   },
 ];
@@ -697,6 +694,8 @@ export default function RecruitmentOS() {
   const [isQrAttendanceMode, setIsQrAttendanceMode] = useState(false);
   const [qrMemberId, setQrMemberId] = useState("m3");
   const [qrScanTime, setQrScanTime] = useState("10:00");
+  const [qrPin, setQrPin] = useState("");
+  const [qrError, setQrError] = useState("");
   const [qrMessage, setQrMessage] = useState("");
 
   useEffect(() => {
@@ -796,13 +795,41 @@ export default function RecruitmentOS() {
     [loggedInMemberId],
   );
 
+  const isBoss = loggedInMemberId === "m1";
+  const isAdmin = loggedInMemberId === "m1" || loggedInMemberId === "m2";
   const visibleViews = loggedInProfile?.access ?? defaultViews;
+  const assignableMembers = isAdmin
+    ? state.members
+    : loggedInMember
+      ? [loggedInMember]
+      : [];
+  const visibleTasks = isAdmin
+    ? state.tasks
+    : state.tasks.filter((task) => task.owner === loggedInMember?.name);
+  const visibleAttendanceLogs = isAdmin
+    ? state.attendanceLogs
+    : state.attendanceLogs.filter((log) => log.member === loggedInMember?.name);
+  const visibleReports = isAdmin
+    ? state.reports
+    : state.reports.filter((report) => report.member === loggedInMember?.name);
+
+  function ownedName(form: FormData, field = "owner") {
+    if (!isAdmin) return loggedInMember?.name || activeMember?.name || "Team";
+
+    return String(form.get(field) || activeMember?.name || "Team");
+  }
 
   useEffect(() => {
     if (!visibleViews.includes(activeView)) {
       setActiveView(visibleViews[0] ?? "Control");
     }
   }, [activeView, visibleViews]);
+
+  useEffect(() => {
+    if (loggedInMemberId && !isBoss && activeMemberId !== loggedInMemberId) {
+      setActiveMemberId(loggedInMemberId);
+    }
+  }, [activeMemberId, isBoss, loggedInMemberId]);
 
   const metrics = useMemo(() => {
     const openRequirements = state.requirements.filter(
@@ -898,7 +925,7 @@ export default function RecruitmentOS() {
           industry: String(form.get("industry") || "General"),
           status: "Prospect",
           model: String(form.get("model") || "8.33% Annual CTC"),
-          owner: String(form.get("owner") || "BDO"),
+          owner: ownedName(form),
           nextFollowUp: String(form.get("nextFollowUp") || "Tomorrow"),
         },
         ...current.clients,
@@ -917,7 +944,7 @@ export default function RecruitmentOS() {
           id: makeId("follow"),
           type: String(form.get("type") || "Client") as FollowUp["type"],
           title: String(form.get("title") || "New follow-up"),
-          owner: String(form.get("owner") || activeMember?.name || "Team"),
+          owner: ownedName(form),
           due: String(form.get("due") || "Today"),
           status: "Pending",
         },
@@ -941,7 +968,7 @@ export default function RecruitmentOS() {
           salary: String(form.get("salary") || "As per market"),
           priority: "High",
           status: "Vacancy Found",
-          owner: String(form.get("owner") || "Rohan Dongre"),
+          owner: ownedName(form),
         },
         ...current.requirements,
       ],
@@ -962,7 +989,7 @@ export default function RecruitmentOS() {
           phone: String(form.get("phone") || ""),
           city: String(form.get("city") || "Nashik"),
           stage: "Application",
-          owner: String(form.get("owner") || "Laxmi"),
+          owner: ownedName(form),
           company: String(form.get("company") || "Pipeline"),
         },
         ...current.candidates,
@@ -979,7 +1006,7 @@ export default function RecruitmentOS() {
       reports: [
         {
           id: makeId("report"),
-          member: String(form.get("member") || "Team"),
+          member: ownedName(form, "member"),
           date: getTodayDate(),
           completed: String(form.get("completed") || ""),
           stuck: String(form.get("stuck") || "No blocker"),
@@ -1028,6 +1055,9 @@ export default function RecruitmentOS() {
   }
 
   function updateTaskStatus(id: string, status: Task["status"]) {
+    const task = state.tasks.find((item) => item.id === id);
+    if (!isAdmin && task?.owner !== loggedInMember?.name) return;
+
     setState((current) => ({
       ...current,
       tasks: current.tasks.map((item) =>
@@ -1047,7 +1077,7 @@ export default function RecruitmentOS() {
           company: String(form.get("company") || "Client"),
           candidate: String(form.get("candidate") || "Candidate"),
           amount: Number(form.get("amount") || 0),
-          owner: String(form.get("owner") || activeMember?.name || "Team"),
+          owner: ownedName(form),
           status: "Draft",
           due: String(form.get("due") || "This week"),
         },
@@ -1066,7 +1096,7 @@ export default function RecruitmentOS() {
         {
           id: makeId("task"),
           title: String(form.get("title") || "New task"),
-          owner: String(form.get("owner") || activeMember?.name || "Team"),
+          owner: ownedName(form),
           assignedBy: loggedInMember?.name || "Sagar Sonawane",
           due: String(form.get("due") || "Today"),
           priority: String(form.get("priority") || "Medium") as Task["priority"],
@@ -1125,7 +1155,7 @@ export default function RecruitmentOS() {
   function markAttendance(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const memberName = String(form.get("member") || activeMember?.name);
+    const memberName = ownedName(form, "member");
     const status = String(form.get("status") || "On time") as AttendanceLog["status"];
     const checkIn = String(form.get("checkIn") || getCurrentClockTime());
     recordAttendance(
@@ -1141,12 +1171,24 @@ export default function RecruitmentOS() {
   function submitQrAttendance(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const member = state.members.find((item) => item.id === qrMemberId) ?? activeMember;
+    const profile = loginProfiles.find(
+      (item) => item.memberId === member.id && item.pin === qrPin,
+    );
+
+    if (!profile) {
+      setQrError("Wrong attendance code. Select your own name and enter your code.");
+      setQrMessage("");
+      return;
+    }
+
     const checkIn = qrScanTime || getCurrentClockTime();
     const lateMinutes = getLateMinutes(checkIn);
     const status: AttendanceLog["status"] = lateMinutes > 0 ? "Late" : "On time";
 
     recordAttendance(member.name, checkIn, "", status, lateMinutes);
     setActiveMemberId(member.id);
+    setQrPin("");
+    setQrError("");
     setQrMessage(
       `${member.name} attendance marked at ${checkIn} (${status}${
         lateMinutes ? `, ${lateMinutes} min late` : ""
@@ -1157,7 +1199,9 @@ export default function RecruitmentOS() {
   function quickUpdate(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
-    const memberId = String(form.get("member") || activeMemberId);
+    const memberId = isAdmin
+      ? String(form.get("member") || activeMemberId)
+      : loggedInMemberId || activeMemberId;
     const attendance = String(form.get("attendance") || "On time") as Member["attendance"];
     setState((current) => ({
       ...current,
@@ -1182,12 +1226,13 @@ export default function RecruitmentOS() {
     );
 
     if (!profile) {
-      setLoginError("Wrong PIN. Check your name and try again.");
+      setLoginError("Wrong code. Check your name and office code.");
       return;
     }
 
     setLoggedInMemberId(profile.memberId);
     setActiveMemberId(profile.memberId);
+    setQrMemberId(profile.memberId);
     setActiveView(profile.access[0] ?? "Launch");
     setLoginPin("");
     setLoginError("");
@@ -1253,6 +1298,15 @@ export default function RecruitmentOS() {
                 value={qrScanTime}
               />
             </label>
+            <input
+              aria-label="Attendance code"
+              inputMode="numeric"
+              maxLength={6}
+              onChange={(event) => setQrPin(event.target.value)}
+              placeholder="6 digit attendance code"
+              type="password"
+              value={qrPin}
+            />
             <div className="scan-summary">
               <strong>{qrMember.name}</strong>
               <span>
@@ -1260,6 +1314,7 @@ export default function RecruitmentOS() {
                 {qrLateMinutes ? ` / ${qrLateMinutes} min late` : ""}
               </span>
             </div>
+            {qrError && <span className="login-error">{qrError}</span>}
             {qrMessage && <span className="success-message">{qrMessage}</span>}
             <button type="submit">Mark My Attendance</button>
             <button
@@ -1297,7 +1352,7 @@ export default function RecruitmentOS() {
           <p className="eyebrow">Life Time Success Vision</p>
           <h1>Staff Login</h1>
           <p className="login-copy">
-            Select your name and enter your office PIN to open your work dashboard.
+            Select your name and enter your 6 digit office code to open your work dashboard.
           </p>
           <form className="form-stack" onSubmit={login}>
             <select
@@ -1314,9 +1369,9 @@ export default function RecruitmentOS() {
             <input
               aria-label="PIN"
               inputMode="numeric"
-              maxLength={4}
+              maxLength={6}
               onChange={(event) => setLoginPin(event.target.value)}
-              placeholder="4 digit PIN"
+              placeholder="6 digit office code"
               type="password"
               value={loginPin}
             />
@@ -1361,6 +1416,7 @@ export default function RecruitmentOS() {
           <p className="eyebrow">Logged In</p>
           <strong>{loggedInMember?.name}</strong>
           <span>{loggedInMember?.role}</span>
+          <span>{isBoss ? "Full boss access" : "Personal access only"}</span>
           <button className="ghost-button" onClick={logout} type="button">
             Logout
           </button>
@@ -1381,18 +1437,24 @@ export default function RecruitmentOS() {
             <span className="brand-subline">We get to opportunity</span>
           </div>
           <div className="topbar-actions">
-            <select
-              aria-label="Working as"
-              value={activeMember?.id}
-              onChange={(event) => setActiveMemberId(event.target.value)}
-              disabled={loggedInMember?.role !== "Director / Owner"}
-            >
-              {state.members.map((member) => (
-                <option key={member.id} value={member.id}>
-                  {member.name} - {member.role}
-                </option>
-              ))}
-            </select>
+            {isBoss ? (
+              <select
+                aria-label="Boss reviewing staff member"
+                value={activeMember?.id}
+                onChange={(event) => setActiveMemberId(event.target.value)}
+              >
+                {state.members.map((member) => (
+                  <option key={member.id} value={member.id}>
+                    Review {member.name} - {member.role}
+                  </option>
+                ))}
+              </select>
+            ) : (
+              <div className="identity-lock">
+                <span>Working as</span>
+                <strong>{loggedInMember?.name}</strong>
+              </div>
+            )}
             <button type="button" onClick={() => setActiveView("Reports")}>
               Add Daily Report
             </button>
@@ -1615,7 +1677,18 @@ export default function RecruitmentOS() {
                     <option>Joining</option>
                   </select>
                   <input name="title" placeholder="Follow-up work" />
-                  <input name="owner" placeholder="Owner" defaultValue={activeMember?.name} />
+                  {isAdmin ? (
+                    <select name="owner" aria-label="Follow-up owner" defaultValue={activeMember?.name}>
+                      {assignableMembers.map((member) => (
+                        <option key={member.id}>{member.name}</option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="identity-lock form-lock">
+                      <span>Owner</span>
+                      <strong>{loggedInMember?.name}</strong>
+                    </div>
+                  )}
                   <input name="due" placeholder="Due date/time" defaultValue="Today" />
                   <button type="submit">Add Follow-up</button>
                 </form>
@@ -1663,7 +1736,18 @@ export default function RecruitmentOS() {
                 <input name="company" placeholder="Company" />
                 <input name="positions" placeholder="Positions" type="number" min="1" />
                 <input name="salary" placeholder="Salary range" />
-                <input name="owner" placeholder="Owner" />
+                {isAdmin ? (
+                  <select name="owner" aria-label="Requirement owner" defaultValue={activeMember?.name}>
+                    {assignableMembers.map((member) => (
+                      <option key={member.id}>{member.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="identity-lock form-lock">
+                    <span>Owner</span>
+                    <strong>{loggedInMember?.name}</strong>
+                  </div>
+                )}
                 <button type="submit">Add Requirement</button>
               </form>
             </div>
@@ -1702,7 +1786,18 @@ export default function RecruitmentOS() {
                 <input name="phone" placeholder="Phone" />
                 <input name="city" placeholder="City" />
                 <input name="company" placeholder="Target company" />
-                <input name="owner" placeholder="Owner" />
+                {isAdmin ? (
+                  <select name="owner" aria-label="Candidate owner" defaultValue={activeMember?.name}>
+                    {assignableMembers.map((member) => (
+                      <option key={member.id}>{member.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="identity-lock form-lock">
+                    <span>Owner</span>
+                    <strong>{loggedInMember?.name}</strong>
+                  </div>
+                )}
                 <button type="submit">Add Candidate</button>
               </form>
             </div>
@@ -1757,7 +1852,18 @@ export default function RecruitmentOS() {
                   <option>10% Monthly</option>
                   <option>60% One Month Salary</option>
                 </select>
-                <input name="owner" placeholder="Owner" />
+                {isAdmin ? (
+                  <select name="owner" aria-label="Client owner" defaultValue={activeMember?.name}>
+                    {assignableMembers.map((member) => (
+                      <option key={member.id}>{member.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="identity-lock form-lock">
+                    <span>Owner</span>
+                    <strong>{loggedInMember?.name}</strong>
+                  </div>
+                )}
                 <input name="nextFollowUp" placeholder="Next follow-up" />
                 <button type="submit">Add Client</button>
               </form>
@@ -1846,7 +1952,7 @@ export default function RecruitmentOS() {
                   <span>Priority</span>
                   <span>Status</span>
                 </div>
-                {state.tasks.map((task) => (
+                {visibleTasks.map((task) => (
                   <div className="table-row" key={task.id}>
                     <span>
                       <strong>{task.title}</strong>
@@ -1872,23 +1978,35 @@ export default function RecruitmentOS() {
             </div>
 
             <div className="panel">
-              <PanelHeader title="Assign Task" label="Owner, deadline, priority" />
-              <form className="form-stack" onSubmit={addTask}>
-                <input name="title" placeholder="Task title" />
-                <select name="owner" aria-label="Task owner" defaultValue={activeMember?.name}>
-                  {state.members.map((member) => (
-                    <option key={member.id}>{member.name}</option>
-                  ))}
-                </select>
-                <input name="due" placeholder="Due date/time" defaultValue="Today" />
-                <select name="priority" aria-label="Priority">
-                  <option>High</option>
-                  <option>Medium</option>
-                  <option>Low</option>
-                </select>
-                <textarea name="notes" placeholder="Notes / expected output" rows={3} />
-                <button type="submit">Assign Task</button>
-              </form>
+              {isAdmin ? (
+                <>
+                  <PanelHeader title="Assign Task" label="Owner, deadline, priority" />
+                  <form className="form-stack" onSubmit={addTask}>
+                    <input name="title" placeholder="Task title" />
+                    <select name="owner" aria-label="Task owner" defaultValue={activeMember?.name}>
+                      {assignableMembers.map((member) => (
+                        <option key={member.id}>{member.name}</option>
+                      ))}
+                    </select>
+                    <input name="due" placeholder="Due date/time" defaultValue="Today" />
+                    <select name="priority" aria-label="Priority">
+                      <option>High</option>
+                      <option>Medium</option>
+                      <option>Low</option>
+                    </select>
+                    <textarea name="notes" placeholder="Notes / expected output" rows={3} />
+                    <button type="submit">Assign Task</button>
+                  </form>
+                </>
+              ) : (
+                <>
+                  <PanelHeader title="My Task Access" label="Personal work only" />
+                  <div className="access-note">
+                    <strong>{loggedInMember?.name}</strong>
+                    <span>You can update only tasks assigned to your name.</span>
+                  </div>
+                </>
+              )}
             </div>
           </section>
         )}
@@ -1906,7 +2024,7 @@ export default function RecruitmentOS() {
                   <span>Status</span>
                   <span>Late</span>
                 </div>
-                {state.attendanceLogs.map((log) => (
+                {visibleAttendanceLogs.map((log) => (
                   <div className="table-row" key={log.id}>
                     <span><strong>{log.member}</strong></span>
                     <span>{log.date}</span>
@@ -1938,11 +2056,18 @@ export default function RecruitmentOS() {
                 </div>
               </div>
               <form className="form-stack" onSubmit={markAttendance}>
-                <select name="member" aria-label="Attendance member" defaultValue={activeMember?.name}>
-                  {state.members.map((member) => (
-                    <option key={member.id}>{member.name}</option>
-                  ))}
-                </select>
+                {isAdmin ? (
+                  <select name="member" aria-label="Attendance member" defaultValue={activeMember?.name}>
+                    {assignableMembers.map((member) => (
+                      <option key={member.id}>{member.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="identity-lock form-lock">
+                    <span>Attendance for</span>
+                    <strong>{loggedInMember?.name}</strong>
+                  </div>
+                )}
                 <input name="checkIn" placeholder="Check-in time, e.g. 09:55" />
                 <input name="checkOut" placeholder="Check-out time, optional" />
                 <select name="status" aria-label="Attendance status">
@@ -2001,7 +2126,11 @@ export default function RecruitmentOS() {
                 <input name="company" placeholder="Client company" />
                 <input name="candidate" placeholder="Candidate / joining batch" />
                 <input name="amount" placeholder="Invoice amount" type="number" min="0" />
-                <input name="owner" placeholder="Owner" defaultValue={activeMember?.name} />
+                <select name="owner" aria-label="Invoice owner" defaultValue={activeMember?.name}>
+                  {assignableMembers.map((member) => (
+                    <option key={member.id}>{member.name}</option>
+                  ))}
+                </select>
                 <input name="due" placeholder="Due / payment follow-up" />
                 <button type="submit">Add Invoice</button>
               </form>
@@ -2014,7 +2143,18 @@ export default function RecruitmentOS() {
             <div className="panel">
               <PanelHeader title="Daily Report" label="End of day" />
               <form className="form-stack" onSubmit={addDailyReport}>
-                <input name="member" placeholder="Your name" />
+                {isAdmin ? (
+                  <select name="member" aria-label="Report member" defaultValue={activeMember?.name}>
+                    {assignableMembers.map((member) => (
+                      <option key={member.id}>{member.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="identity-lock form-lock">
+                    <span>Report by</span>
+                    <strong>{loggedInMember?.name}</strong>
+                  </div>
+                )}
                 <textarea name="completed" placeholder="Completed today" rows={4} />
                 <textarea name="stuck" placeholder="Stuck / support needed" rows={3} />
                 <textarea name="tomorrow" placeholder="Tomorrow focus" rows={3} />
@@ -2025,7 +2165,7 @@ export default function RecruitmentOS() {
             <div className="panel wide">
               <PanelHeader title="Report History" label="Boss review" />
               <div className="report-list">
-                {state.reports.map((report) => (
+                {visibleReports.map((report) => (
                   <article className="report-card" key={report.id}>
                     <header>
                       <strong>{report.member}</strong>

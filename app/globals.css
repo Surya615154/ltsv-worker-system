@@ -364,6 +364,48 @@ button {
   gap: 10px;
 }
 
+.identity-lock {
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  color: var(--ink);
+  display: grid;
+  gap: 2px;
+  min-height: 42px;
+  min-width: 210px;
+  padding: 7px 12px;
+}
+
+.identity-lock span {
+  color: var(--muted);
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.identity-lock strong {
+  font-size: 14px;
+}
+
+.form-lock {
+  min-width: 0;
+  width: 100%;
+}
+
+.access-note {
+  background: #f4f8f7;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+}
+
+.access-note span {
+  color: var(--muted);
+  line-height: 1.4;
+}
+
 .topbar-actions button,
 .form-stack button,
 .form-grid button {
@@ -1078,6 +1120,10 @@ textarea {
   .topbar-actions {
     align-items: stretch;
     flex-direction: column;
+  }
+
+  .identity-lock {
+    min-width: 0;
   }
 
   .metric-grid,
