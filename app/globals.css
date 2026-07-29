@@ -311,12 +311,69 @@ textarea {
   margin-bottom: 16px;
 }
 
+.launch-hero {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  box-shadow: var(--shadow);
+  display: grid;
+  gap: 24px;
+  grid-template-columns: minmax(0, 1fr) 220px;
+  margin-bottom: 16px;
+  padding: 22px;
+}
+
+.launch-hero h3 {
+  font-size: clamp(28px, 4vw, 46px);
+  line-height: 1;
+  margin: 0;
+}
+
+.launch-hero p {
+  color: var(--muted);
+  line-height: 1.45;
+  margin: 12px 0 0;
+  max-width: 720px;
+}
+
+.launch-status {
+  background: #17342f;
+  border-radius: 8px;
+  color: #f8fbf9;
+  padding: 18px;
+}
+
+.launch-status span,
+.launch-status strong {
+  display: block;
+}
+
+.launch-status span {
+  color: #c7d9d4;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.launch-status strong {
+  font-size: 36px;
+  line-height: 1;
+  margin-top: 10px;
+}
+
+.launch-grid {
+  display: grid;
+  gap: 16px;
+  grid-template-columns: minmax(0, 1fr) minmax(300px, 0.8fr);
+}
+
 .metric-card,
 .panel,
 .candidate-card,
 .client-card,
 .report-card,
-.role-card {
+.role-card,
+.rule-card {
   background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 8px;
@@ -379,9 +436,78 @@ textarea {
 .form-stack,
 .form-grid,
 .candidate-grid,
-.role-list {
+.role-list,
+.check-list,
+.rhythm-list,
+.rule-grid {
   display: grid;
   gap: 10px;
+}
+
+.check-row {
+  align-items: center;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 34px 1fr;
+  min-height: 58px;
+  padding: 10px;
+}
+
+.check-row span {
+  align-items: center;
+  background: var(--blue-soft);
+  border-radius: 8px;
+  color: var(--blue);
+  display: flex;
+  font-weight: 900;
+  height: 34px;
+  justify-content: center;
+  width: 34px;
+}
+
+.rhythm-row {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+}
+
+.rhythm-row strong {
+  color: var(--green);
+}
+
+.rhythm-row span,
+.rhythm-row small {
+  color: var(--muted);
+}
+
+.rule-grid {
+  grid-template-columns: repeat(2, minmax(220px, 1fr));
+}
+
+.rule-card {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 42px 1fr;
+  min-height: 76px;
+  padding: 14px;
+}
+
+.rule-card span {
+  align-items: center;
+  background: var(--green-soft);
+  border-radius: 999px;
+  color: var(--green);
+  display: flex;
+  font-size: 12px;
+  font-weight: 900;
+  height: 42px;
+  justify-content: center;
+  width: 42px;
 }
 
 .form-grid {
@@ -668,7 +794,7 @@ textarea {
   }
 
   .nav-list {
-    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-template-columns: repeat(7, minmax(0, 1fr));
   }
 
   .nav-button {
@@ -685,7 +811,8 @@ textarea {
     grid-template-columns: repeat(3, minmax(140px, 1fr));
   }
 
-  .board-grid {
+  .board-grid,
+  .launch-grid {
     grid-template-columns: 1fr;
   }
 }
@@ -703,8 +830,10 @@ textarea {
   }
 
   .metric-grid,
+  .launch-hero,
   .candidate-grid,
-  .nav-list {
+  .nav-list,
+  .rule-grid {
     grid-template-columns: 1fr;
   }
 

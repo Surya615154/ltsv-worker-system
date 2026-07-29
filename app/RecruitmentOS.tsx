@@ -411,36 +411,61 @@ const loginProfiles: LoginProfile[] = [
   {
     memberId: "m1",
     pin: "1001",
-    access: ["Control", "Pipeline", "Clients", "Team", "Money", "Reports"],
+    access: ["Launch", "Control", "Pipeline", "Clients", "Team", "Money", "Reports"],
   },
   {
     memberId: "m2",
     pin: "1002",
-    access: ["Control", "Pipeline", "Clients", "Team", "Money", "Reports"],
+    access: ["Launch", "Control", "Pipeline", "Clients", "Team", "Money", "Reports"],
   },
   {
     memberId: "m3",
     pin: "1003",
-    access: ["Control", "Pipeline", "Clients", "Money", "Reports"],
+    access: ["Launch", "Control", "Pipeline", "Clients", "Money", "Reports"],
   },
   {
     memberId: "m4",
     pin: "1004",
-    access: ["Control", "Pipeline", "Money", "Reports"],
+    access: ["Launch", "Control", "Pipeline", "Money", "Reports"],
   },
   {
     memberId: "m5",
     pin: "1005",
-    access: ["Control", "Pipeline", "Reports"],
+    access: ["Launch", "Control", "Pipeline", "Reports"],
   },
   {
     memberId: "m6",
     pin: "1006",
-    access: ["Control", "Pipeline", "Reports"],
+    access: ["Launch", "Control", "Pipeline", "Reports"],
   },
 ];
 
-const defaultViews = ["Control", "Pipeline", "Clients", "Team", "Money", "Reports"];
+const defaultViews = ["Launch", "Control", "Pipeline", "Clients", "Team", "Money", "Reports"];
+
+const launchChecklist = [
+  "Every staff member logs in from their own phone before work starts.",
+  "Sagar sir assigns daily priorities from Control and Follow-ups.",
+  "BDO updates client approach, permission, meeting, and agreement stages.",
+  "Recruiter and coordinators update candidate stages before evening review.",
+  "All staff submit the Daily Report before leaving office.",
+  "Invoice/payment status is reviewed after every joining confirmation.",
+];
+
+const operatingRhythm = [
+  { time: "10:00 AM", action: "Morning allocation", owner: "Sagar sir" },
+  { time: "10:15 AM", action: "Company and candidate calling", owner: "All team" },
+  { time: "02:30 PM", action: "Interview, vacancy, and agreement follow-up", owner: "BDO / HR / Recruiter" },
+  { time: "05:30 PM", action: "Daily report and target update", owner: "Every staff member" },
+  { time: "Saturday", action: "Performance, payment, and pipeline review", owner: "Boss + HR Head" },
+];
+
+const launchRules = [
+  "Work not updated in the system is not counted.",
+  "Every follow-up must have one owner and one due date.",
+  "Candidate movement must follow the defined pipeline stages.",
+  "Client status must move from approach to agreement to active account.",
+  "Late, absent, weak target, and pending payment items are reviewed weekly.",
+];
 
 function makeId(prefix: string) {
   return `${prefix}-${Date.now()}-${Math.round(Math.random() * 1000)}`;
@@ -804,7 +829,7 @@ export default function RecruitmentOS() {
 
     setLoggedInMemberId(profile.memberId);
     setActiveMemberId(profile.memberId);
-    setActiveView(profile.access[0] ?? "Control");
+    setActiveView(profile.access[0] ?? "Launch");
     setLoginPin("");
     setLoginError("");
     window.sessionStorage.setItem("ltsv-login-member", profile.memberId);
@@ -815,7 +840,7 @@ export default function RecruitmentOS() {
     setLoggedInMemberId(null);
     setLoginPin("");
     setLoginError("");
-    setActiveView("Control");
+    setActiveView("Launch");
   }
 
   function toggleFollowUp(id: string) {
@@ -942,6 +967,73 @@ export default function RecruitmentOS() {
             </button>
           </div>
         </header>
+
+        {activeView === "Launch" && (
+          <>
+            <section className="launch-hero">
+              <div>
+                <p className="eyebrow">Final launch version</p>
+                <h3>Life Time Success Vision Office System</h3>
+                <p>
+                  A daily control system for discipline, client development,
+                  candidate pipeline, reports, and payment follow-up.
+                </p>
+              </div>
+              <div className="launch-status">
+                <span>Ready for office pilot</span>
+                <strong>Today</strong>
+              </div>
+            </section>
+
+            <section className="metric-grid" aria-label="Launch summary">
+              <Metric label="Team logins" value={state.members.length} detail="staff profiles" />
+              <Metric label="Client pipeline" value={state.clients.length} detail="accounts loaded" />
+              <Metric label="Candidate stages" value={stages.length} detail="full workflow" />
+              <Metric label="Daily reports" value={state.reports.length} detail="review history" />
+              <Metric label="Money control" value={state.invoices.length} detail="invoice entries" />
+              <Metric label="Discipline" value={`${metrics.discipline}%`} detail="target score" />
+            </section>
+
+            <section className="launch-grid">
+              <div className="panel">
+                <PanelHeader title="Launch Checklist" label="Day 1 activation" />
+                <div className="check-list">
+                  {launchChecklist.map((item, index) => (
+                    <div className="check-row" key={item}>
+                      <span>{index + 1}</span>
+                      <strong>{item}</strong>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="panel">
+                <PanelHeader title="Office Rhythm" label="Daily working system" />
+                <div className="rhythm-list">
+                  {operatingRhythm.map((item) => (
+                    <article className="rhythm-row" key={item.time}>
+                      <strong>{item.time}</strong>
+                      <span>{item.action}</span>
+                      <small>{item.owner}</small>
+                    </article>
+                  ))}
+                </div>
+              </div>
+
+              <div className="panel wide">
+                <PanelHeader title="Non-Negotiable Rules" label="Culture control" />
+                <div className="rule-grid">
+                  {launchRules.map((rule) => (
+                    <article className="rule-card" key={rule}>
+                      <span aria-hidden="true">OK</span>
+                      <strong>{rule}</strong>
+                    </article>
+                  ))}
+                </div>
+              </div>
+            </section>
+          </>
+        )}
 
         {activeView === "Control" && (
           <>
