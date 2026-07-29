@@ -65,12 +65,35 @@ button {
   padding: 18px;
 }
 
+.qr-shell {
+  align-items: center;
+  background:
+    linear-gradient(145deg, rgba(23, 52, 47, 0.96), rgba(36, 90, 148, 0.7)),
+    url("/ltsv-logo.png");
+  background-position: center;
+  background-size: min(680px, 92vw);
+  display: grid;
+  justify-items: center;
+  min-height: 100vh;
+  padding: 18px;
+}
+
 .login-card {
   background: rgba(255, 255, 255, 0.96);
   border: 1px solid rgba(255, 255, 255, 0.82);
   border-radius: 8px;
   box-shadow: 0 26px 90px rgba(0, 0, 0, 0.22);
   max-width: 420px;
+  padding: 28px;
+  width: 100%;
+}
+
+.qr-card {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(255, 255, 255, 0.82);
+  border-radius: 8px;
+  box-shadow: 0 26px 90px rgba(0, 0, 0, 0.22);
+  max-width: 460px;
   padding: 28px;
   width: 100%;
 }
@@ -92,6 +115,12 @@ button {
   margin: 0;
 }
 
+.qr-card h1 {
+  font-size: 34px;
+  line-height: 1;
+  margin: 0;
+}
+
 .login-copy {
   color: var(--muted);
   line-height: 1.45;
@@ -106,6 +135,67 @@ button {
   font-size: 13px;
   font-weight: 800;
   padding: 10px 12px;
+}
+
+.success-message {
+  background: var(--green-soft);
+  border-radius: 8px;
+  color: var(--green);
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.35;
+  padding: 10px 12px;
+}
+
+.time-field {
+  display: grid;
+  gap: 6px;
+}
+
+.time-field span {
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 900;
+  text-transform: uppercase;
+}
+
+.scan-summary {
+  align-items: center;
+  background: #f4f8f7;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: flex;
+  justify-content: space-between;
+  min-height: 56px;
+  padding: 10px 12px;
+}
+
+.scan-summary span {
+  color: var(--green);
+  font-weight: 900;
+}
+
+.secondary-button,
+.link-button {
+  border-radius: 8px;
+  font-weight: 800;
+  min-height: 42px;
+  padding: 0 16px;
+  width: 100%;
+}
+
+.secondary-button {
+  background: var(--blue-soft);
+  border: 1px solid transparent;
+  color: var(--blue);
+}
+
+.link-button {
+  background: transparent;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  margin-top: 12px;
 }
 
 .app-shell {
@@ -830,6 +920,45 @@ textarea {
   color: var(--blue);
 }
 
+.qr-print-card {
+  align-items: center;
+  border: 1px dashed #b7c9c3;
+  border-radius: 8px;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 112px minmax(0, 1fr);
+  margin-bottom: 14px;
+  padding: 12px;
+}
+
+.qr-code {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  height: 112px;
+  object-fit: contain;
+  padding: 6px;
+  width: 112px;
+}
+
+.qr-print-card strong,
+.qr-print-card span,
+.qr-print-card a {
+  display: block;
+}
+
+.qr-print-card span {
+  color: var(--muted);
+  line-height: 1.35;
+  margin: 4px 0 8px;
+}
+
+.qr-print-card a {
+  color: var(--blue);
+  font-weight: 900;
+  text-decoration: none;
+}
+
 .team-table .table-row span:last-child {
   font-weight: 900;
 }
@@ -878,6 +1007,11 @@ textarea {
 .attendance.absent {
   background: var(--red-soft);
   color: var(--red);
+}
+
+.attendance.half-day {
+  background: var(--blue-soft);
+  color: var(--blue);
 }
 
 .report-card {
@@ -958,6 +1092,7 @@ textarea {
   .form-grid,
   .client-card,
   .candidate-card,
+  .qr-print-card,
   .requirements-table .table-head,
   .requirements-table .table-row,
   .team-table .table-head,

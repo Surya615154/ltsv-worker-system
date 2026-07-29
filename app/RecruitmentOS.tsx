@@ -2,6 +2,12 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
+const attendanceQrLink =
+  "https://ltsv-worker-system.suryawanshivishal625.chatgpt.site/#qr-attendance";
+const attendanceQrImage =
+  "https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=16&data=https%3A%2F%2Fltsv-worker-system.suryawanshivishal625.chatgpt.site%2F%23qr-attendance";
+const officeStartTime = "10:00";
+
 type Member = {
   id: string;
   name: string;
@@ -359,7 +365,7 @@ const seedState: OfficeState = {
     {
       id: "d1",
       member: "Vishwatej Suryawanshi",
-      date: new Date().toISOString().slice(0, 10),
+      date: getTodayDate(),
       completed: "Company calls, permission follow-ups, and meeting pipeline updated",
       stuck: "Need decision on next client visit priority",
       tomorrow: "Push agreement follow-up and schedule one client meeting",
@@ -421,7 +427,7 @@ const seedState: OfficeState = {
     {
       id: "a1",
       member: "Sagar Sonawane",
-      date: new Date().toISOString().slice(0, 10),
+      date: getTodayDate(),
       checkIn: "09:50",
       checkOut: "",
       status: "On time",
@@ -430,7 +436,7 @@ const seedState: OfficeState = {
     {
       id: "a2",
       member: "Vishwatej Suryawanshi",
-      date: new Date().toISOString().slice(0, 10),
+      date: getTodayDate(),
       checkIn: "09:58",
       checkOut: "",
       status: "On time",
@@ -439,7 +445,7 @@ const seedState: OfficeState = {
     {
       id: "a3",
       member: "Rohan Dongre",
-      date: new Date().toISOString().slice(0, 10),
+      date: getTodayDate(),
       checkIn: "10:11",
       checkOut: "",
       status: "Late",
@@ -568,6 +574,7 @@ const defaultViews = [
 
 const launchChecklist = [
   "Every staff member logs in from their own phone before work starts.",
+  "Office QR is pasted near the entrance and attendance starts through scan.",
   "Sagar sir assigns daily priorities from Control and Follow-ups.",
   "BDO updates client approach, permission, meeting, and agreement stages.",
   "Recruiter and coordinators update candidate stages before evening review.",
@@ -645,6 +652,39 @@ function normalizeOfficeState(payload: OfficeState): OfficeState {
   };
 }
 
+function getTodayDate() {
+  const today = new Date();
+  const year = today.getFullYear();
+  const month = String(today.getMonth() + 1).padStart(2, "0");
+  const day = String(today.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
+function getCurrentClockTime() {
+  return new Date().toLocaleTimeString("en-IN", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  });
+}
+
+function getLateMinutes(checkIn: string) {
+  const [startHour, startMinute] = officeStartTime.split(":").map(Number);
+  const [checkHour, checkMinute] = checkIn.split(":").map(Number);
+
+  if (
+    Number.isNaN(startHour) ||
+    Number.isNaN(startMinute) ||
+    Number.isNaN(checkHour) ||
+    Number.isNaN(checkMinute)
+  ) {
+    return 0;
+  }
+
+  return Math.max(0, checkHour * 60 + checkMinute - (startHour * 60 + startMinute));
+}
+
 export default function RecruitmentOS() {
   const [state, setState] = useState<OfficeState>(seedState);
   const [activeView, setActiveView] = useState("Control");
@@ -654,6 +694,10 @@ export default function RecruitmentOS() {
   const [loggedInMemberId, setLoggedInMemberId] = useState<string | null>(null);
   const [loginPin, setLoginPin] = useState("");
   const [loginError, setLoginError] = useState("");
+  const [isQrAttendanceMode, setIsQrAttendanceMode] = useState(false);
+  const [qrMemberId, setQrMemberId] = useState("m3");
+  const [qrScanTime, setQrScanTime] = useState("10:00");
+  const [qrMessage, setQrMessage] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -681,8 +725,39 @@ export default function RecruitmentOS() {
       setLoggedInMemberId(savedMemberId);
       setActiveMemberId(savedMemberId);
       setLoginMemberId(savedMemberId);
+      setQrMemberId(savedMemberId);
     }
   }, []);
+
+  useEffect(() => {
+    function detectQrMode() {
+      const params = new URLSearchParams(window.location.search);
+      const qrMode =
+        window.location.hash === "#qr-attendance" ||
+        params.get("attendance") === "qr";
+
+      setIsQrAttendanceMode(qrMode);
+      if (qrMode) {
+        setActiveView("Attendance");
+        setQrScanTime(getCurrentClockTime());
+      }
+    }
+
+    detectQrMode();
+    window.addEventListener("hashchange", detectQrMode);
+
+    return () => window.removeEventListener("hashchange", detectQrMode);
+  }, []);
+
+  useEffect(() => {
+    if (!isQrAttendanceMode) return;
+
+    const timer = window.setInterval(() => {
+      setQrScanTime(getCurrentClockTime());
+    }, 30000);
+
+    return () => window.clearInterval(timer);
+  }, [isQrAttendanceMode]);
 
   useEffect(() => {
     const handle = window.setTimeout(async () => {
@@ -745,7 +820,7 @@ export default function RecruitmentOS() {
     );
     const openTasks = state.tasks.filter((item) => item.status !== "Done");
     const blockedTasks = state.tasks.filter((item) => item.status === "Blocked");
-    const today = new Date().toISOString().slice(0, 10);
+    const today = getTodayDate();
     const todayAttendance = state.attendanceLogs.filter(
       (item) => item.date === today,
     );
@@ -905,7 +980,7 @@ export default function RecruitmentOS() {
         {
           id: makeId("report"),
           member: String(form.get("member") || "Team"),
-          date: new Date().toISOString().slice(0, 10),
+          date: getTodayDate(),
           completed: String(form.get("completed") || ""),
           stuck: String(form.get("stuck") || "No blocker"),
           tomorrow: String(form.get("tomorrow") || ""),
@@ -1004,34 +1079,79 @@ export default function RecruitmentOS() {
     event.currentTarget.reset();
   }
 
-  function markAttendance(event: FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-    const form = new FormData(event.currentTarget);
-    const memberName = String(form.get("member") || activeMember?.name);
-    const status = String(form.get("status") || "On time") as AttendanceLog["status"];
-    const today = new Date().toISOString().slice(0, 10);
-
+  function recordAttendance(
+    memberName: string,
+    checkIn: string,
+    checkOut: string,
+    status: AttendanceLog["status"],
+    lateMinutes: number,
+  ) {
+    const today = getTodayDate();
     setState((current) => ({
       ...current,
-      attendanceLogs: [
-        {
-          id: makeId("att"),
+      attendanceLogs: (() => {
+        const existingIndex = current.attendanceLogs.findIndex(
+          (log) => log.member === memberName && log.date === today,
+        );
+        const nextLog: AttendanceLog = {
+          id:
+            existingIndex >= 0
+              ? current.attendanceLogs[existingIndex].id
+              : makeId("att"),
           member: memberName,
           date: today,
-          checkIn: String(form.get("checkIn") || "10:00"),
-          checkOut: String(form.get("checkOut") || ""),
+          checkIn,
+          checkOut,
           status,
-          lateMinutes: Number(form.get("lateMinutes") || 0),
-        },
-        ...current.attendanceLogs,
-      ],
+          lateMinutes,
+        };
+
+        if (existingIndex >= 0) {
+          return current.attendanceLogs.map((log, index) =>
+            index === existingIndex ? nextLog : log,
+          );
+        }
+
+        return [nextLog, ...current.attendanceLogs];
+      })(),
       members: current.members.map((member) =>
         member.name === memberName && ["On time", "Late", "Absent"].includes(status)
           ? { ...member, attendance: status as Member["attendance"] }
           : member,
       ),
     }));
+  }
+
+  function markAttendance(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    const memberName = String(form.get("member") || activeMember?.name);
+    const status = String(form.get("status") || "On time") as AttendanceLog["status"];
+    const checkIn = String(form.get("checkIn") || getCurrentClockTime());
+    recordAttendance(
+      memberName,
+      checkIn,
+      String(form.get("checkOut") || ""),
+      status,
+      Number(form.get("lateMinutes") || getLateMinutes(checkIn)),
+    );
     event.currentTarget.reset();
+  }
+
+  function submitQrAttendance(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const member = state.members.find((item) => item.id === qrMemberId) ?? activeMember;
+    const checkIn = qrScanTime || getCurrentClockTime();
+    const lateMinutes = getLateMinutes(checkIn);
+    const status: AttendanceLog["status"] = lateMinutes > 0 ? "Late" : "On time";
+
+    recordAttendance(member.name, checkIn, "", status, lateMinutes);
+    setActiveMemberId(member.id);
+    setQrMessage(
+      `${member.name} attendance marked at ${checkIn} (${status}${
+        lateMinutes ? `, ${lateMinutes} min late` : ""
+      }).`,
+    );
   }
 
   function quickUpdate(event: FormEvent<HTMLFormElement>) {
@@ -1091,6 +1211,78 @@ export default function RecruitmentOS() {
           : item,
       ),
     }));
+  }
+
+  if (isQrAttendanceMode) {
+    const qrMember = state.members.find((member) => member.id === qrMemberId) ?? activeMember;
+    const qrLateMinutes = getLateMinutes(qrScanTime);
+    const qrStatus = qrLateMinutes > 0 ? "Late" : "On time";
+
+    return (
+      <main className="qr-shell">
+        <section className="qr-card">
+          <img
+            alt="Life Time Success Vision logo"
+            className="login-logo"
+            src="/ltsv-logo.png"
+          />
+          <p className="eyebrow">QR Attendance</p>
+          <h1>Mark Office Attendance</h1>
+          <p className="login-copy">
+            Scan time is taken from this phone. Select your name and mark your
+            check-in for today.
+          </p>
+          <form className="form-stack" onSubmit={submitQrAttendance}>
+            <select
+              aria-label="Staff name for QR attendance"
+              value={qrMemberId}
+              onChange={(event) => setQrMemberId(event.target.value)}
+            >
+              {state.members.map((member) => (
+                <option key={member.id} value={member.id}>
+                  {member.name} - {member.role}
+                </option>
+              ))}
+            </select>
+            <label className="time-field">
+              <span>Check-in time</span>
+              <input
+                aria-label="QR check-in time"
+                onChange={(event) => setQrScanTime(event.target.value)}
+                type="time"
+                value={qrScanTime}
+              />
+            </label>
+            <div className="scan-summary">
+              <strong>{qrMember.name}</strong>
+              <span>
+                {qrStatus}
+                {qrLateMinutes ? ` / ${qrLateMinutes} min late` : ""}
+              </span>
+            </div>
+            {qrMessage && <span className="success-message">{qrMessage}</span>}
+            <button type="submit">Mark My Attendance</button>
+            <button
+              className="secondary-button"
+              onClick={() => setQrScanTime(getCurrentClockTime())}
+              type="button"
+            >
+              Refresh Current Time
+            </button>
+          </form>
+          <button
+            className="link-button"
+            onClick={() => {
+              window.location.hash = "";
+              setIsQrAttendanceMode(false);
+            }}
+            type="button"
+          >
+            Open Staff Login
+          </button>
+        </section>
+      </main>
+    );
   }
 
   if (!loggedInMemberId) {
@@ -1731,6 +1923,20 @@ export default function RecruitmentOS() {
 
             <div className="panel">
               <PanelHeader title="Mark Attendance" label="Phone check-in entry" />
+              <div className="qr-print-card">
+                <img
+                  alt="Office attendance QR code"
+                  className="qr-code"
+                  src={attendanceQrImage}
+                />
+                <div>
+                  <strong>Office QR Code</strong>
+                  <span>Paste this at the office entrance.</span>
+                  <a href={attendanceQrLink} target="_blank" rel="noreferrer">
+                    Open scan page
+                  </a>
+                </div>
+              </div>
               <form className="form-stack" onSubmit={markAttendance}>
                 <select name="member" aria-label="Attendance member" defaultValue={activeMember?.name}>
                   {state.members.map((member) => (
