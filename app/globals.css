@@ -934,12 +934,17 @@ textarea {
 
 .attendance-table .table-head,
 .attendance-table .table-row {
-  grid-template-columns: minmax(160px, 1.1fr) 110px 80px 80px 110px 80px;
+  grid-template-columns: minmax(150px, 1fr) 110px 80px 110px 110px 120px;
 }
 
 .leave-table .table-head,
 .leave-table .table-row {
   grid-template-columns: minmax(150px, 0.9fr) 150px minmax(220px, 1.4fr) 110px 170px;
+}
+
+.gate-table .table-head,
+.gate-table .table-row {
+  grid-template-columns: minmax(150px, 0.9fr) minmax(220px, 1.3fr) 150px 110px 170px;
 }
 
 .priority {
@@ -1101,6 +1106,34 @@ textarea {
   padding: 0 12px;
 }
 
+.alert-panel {
+  border-bottom: 1px solid var(--line);
+  display: grid;
+  gap: 10px;
+  margin-bottom: 16px;
+  padding-bottom: 16px;
+}
+
+.alert-card {
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  display: grid;
+  gap: 8px;
+  padding: 12px;
+}
+
+.alert-card span,
+.alert-card small {
+  color: var(--muted);
+}
+
+.alert-card a,
+.data-table a {
+  color: var(--blue);
+  font-weight: 900;
+  text-decoration: none;
+}
+
 .grant-button {
   background: var(--green);
 }
@@ -1204,6 +1237,8 @@ textarea {
   .attendance-table .table-row,
   .leave-table .table-head,
   .leave-table .table-row,
+  .gate-table .table-head,
+  .gate-table .table-row,
   .pipeline-bar {
     grid-template-columns: 1fr;
   }

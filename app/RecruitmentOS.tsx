@@ -131,6 +131,11 @@ type AttendanceLog = {
   checkOut: string;
   status: "On time" | "Late" | "Absent" | "Half day";
   lateMinutes: number;
+  method?: "QR Scan" | "Manual";
+  verification?: "Pending" | "Verified" | "Rejected";
+  locationText?: string;
+  mapLink?: string;
+  alertText?: string;
 };
 
 type LeaveRequest = {
@@ -139,6 +144,18 @@ type LeaveRequest = {
   fromDate: string;
   toDate: string;
   reason: string;
+  status: "Pending" | "Granted" | "Rejected";
+  requestedOn: string;
+  decidedBy: string;
+};
+
+type GatePassRequest = {
+  id: string;
+  member: string;
+  destination: string;
+  reason: string;
+  outTime: string;
+  expectedReturn: string;
   status: "Pending" | "Granted" | "Rejected";
   requestedOn: string;
   decidedBy: string;
@@ -155,6 +172,7 @@ type OfficeState = {
   tasks: Task[];
   attendanceLogs: AttendanceLog[];
   leaveRequests: LeaveRequest[];
+  gatePassRequests: GatePassRequest[];
 };
 
 type LoginProfile = {
@@ -248,6 +266,62 @@ const seedState: OfficeState = {
       cv: 12,
       interviews: 0,
       target: 85,
+    },
+    {
+      id: "m7",
+      name: "Satish Khillare",
+      role: "BDM",
+      desk: "Business development",
+      responsibility:
+        "Client development, company approach, meeting pipeline, and business relationship follow-up.",
+      targetText: "35 company calls + 5 hot follow-ups + 1 active client movement",
+      attendance: "On time",
+      calls: 26,
+      cv: 0,
+      interviews: 0,
+      target: 35,
+    },
+    {
+      id: "m8",
+      name: "Vaishnavi Borhade",
+      role: "BRE",
+      desk: "Business relationship",
+      responsibility:
+        "Relationship follow-up, client coordination, requirement tracking, and daily communication discipline.",
+      targetText: "35 relationship calls + client follow-up updates",
+      attendance: "On time",
+      calls: 24,
+      cv: 0,
+      interviews: 0,
+      target: 35,
+    },
+    {
+      id: "m9",
+      name: "Gayatri Pawar",
+      role: "CRE",
+      desk: "Customer relationship",
+      responsibility:
+        "Candidate/client response handling, coordination calls, status updates, and service follow-up.",
+      targetText: "45 coordination calls + daily status update",
+      attendance: "On time",
+      calls: 31,
+      cv: 4,
+      interviews: 1,
+      target: 45,
+    },
+    {
+      id: "m10",
+      name: "Nandini",
+      role: "Team Leader Finance",
+      desk: "Finance control",
+      responsibility:
+        "Invoice tracking, payment follow-up, finance coordination, and collection reporting.",
+      targetText: "Daily invoice review + payment follow-up report",
+      attendance: "On time",
+      calls: 18,
+      cv: 0,
+      interviews: 0,
+      target: 25,
     },
   ],
   clients: [
@@ -444,6 +518,9 @@ const seedState: OfficeState = {
       checkOut: "",
       status: "On time",
       lateMinutes: 0,
+      method: "Manual",
+      verification: "Verified",
+      locationText: "Office entry verified",
     },
     {
       id: "a2",
@@ -453,6 +530,9 @@ const seedState: OfficeState = {
       checkOut: "",
       status: "On time",
       lateMinutes: 0,
+      method: "Manual",
+      verification: "Verified",
+      locationText: "Office entry verified",
     },
     {
       id: "a3",
@@ -462,6 +542,9 @@ const seedState: OfficeState = {
       checkOut: "",
       status: "Late",
       lateMinutes: 11,
+      method: "Manual",
+      verification: "Verified",
+      locationText: "Office entry verified",
     },
   ],
   leaveRequests: [
@@ -471,6 +554,19 @@ const seedState: OfficeState = {
       fromDate: getTodayDate(),
       toDate: getTodayDate(),
       reason: "Personal work for half day permission.",
+      status: "Pending",
+      requestedOn: getTodayDate(),
+      decidedBy: "",
+    },
+  ],
+  gatePassRequests: [
+    {
+      id: "gp1",
+      member: "Vishwatej Suryawanshi",
+      destination: "Client visit",
+      reason: "Meeting follow-up with company HR.",
+      outTime: "03:30 PM",
+      expectedReturn: "05:30 PM",
       status: "Pending",
       requestedOn: getTodayDate(),
       decidedBy: "",
@@ -542,6 +638,7 @@ const loginProfiles: LoginProfile[] = [
       "Tasks",
       "Attendance",
       "Leave",
+      "Gate Pass",
       "Money",
       "Reports",
     ],
@@ -557,28 +654,49 @@ const loginProfiles: LoginProfile[] = [
       "Tasks",
       "Attendance",
       "Leave",
+      "Gate Pass",
       "Reports",
     ],
   },
   {
     memberId: "m3",
     pin: "925684",
-    access: ["Launch", "Control", "Clients", "Tasks", "Attendance", "Leave", "Reports"],
+    access: ["Launch", "Control", "Clients", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
   {
     memberId: "m4",
     pin: "384761",
-    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Reports"],
+    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
   {
     memberId: "m5",
     pin: "617493",
-    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Reports"],
+    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
   {
     memberId: "m6",
     pin: "852136",
-    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Reports"],
+    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
+  },
+  {
+    memberId: "m7",
+    pin: "249681",
+    access: ["Launch", "Control", "Clients", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
+  },
+  {
+    memberId: "m8",
+    pin: "739528",
+    access: ["Launch", "Control", "Clients", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
+  },
+  {
+    memberId: "m9",
+    pin: "514872",
+    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
+  },
+  {
+    memberId: "m10",
+    pin: "386419",
+    access: ["Launch", "Money", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
 ];
 
@@ -592,6 +710,7 @@ const defaultViews = [
   "Tasks",
   "Attendance",
   "Leave",
+  "Gate Pass",
   "Money",
   "Reports",
 ];
@@ -600,6 +719,7 @@ const launchChecklist = [
   "Every staff member logs in from their own phone before work starts.",
   "Office QR is pasted near the entrance and attendance starts through scan.",
   "Leave permission must be requested in the system and approved by Sagar sir.",
+  "Gate pass must be requested before leaving office and approved by Sonali ma'am.",
   "Sagar sir assigns daily priorities from Control and Follow-ups.",
   "BDO updates client approach, permission, meeting, and agreement stages.",
   "Recruiter and coordinators update candidate stages before evening review.",
@@ -623,6 +743,7 @@ const launchRules = [
   "Client status must move from approach to agreement to active account.",
   "Late, absent, weak target, and pending payment items are reviewed weekly.",
   "No leave is counted as approved until boss marks it Granted.",
+  "No staff member leaves office without a Granted gate pass.",
 ];
 
 function makeId(prefix: string) {
@@ -655,11 +776,26 @@ function isLegacyDemoData(payload: OfficeState) {
   );
 }
 
+function mergeSeedMembers(members: Member[]) {
+  const loadedMembers = members.length ? members : seedState.members;
+  const existingIds = new Set(loadedMembers.map((member) => member.id));
+  const existingNames = new Set(
+    loadedMembers.map((member) => member.name.toLowerCase()),
+  );
+  const missingMembers = seedState.members.filter(
+    (member) =>
+      !existingIds.has(member.id) &&
+      !existingNames.has(member.name.toLowerCase()),
+  );
+
+  return [...loadedMembers, ...missingMembers];
+}
+
 function normalizeOfficeState(payload: OfficeState): OfficeState {
   const clients = payload.clients?.length ? payload.clients : seedState.clients;
 
   return {
-    members: payload.members?.length ? payload.members : seedState.members,
+    members: mergeSeedMembers(payload.members ?? []),
     clients: clients.map((client) => ({
       ...client,
       status: client.status === "Agreement" ? "Agreement Sent" : client.status,
@@ -678,6 +814,9 @@ function normalizeOfficeState(payload: OfficeState): OfficeState {
     leaveRequests: payload.leaveRequests?.length
       ? payload.leaveRequests
       : seedState.leaveRequests,
+    gatePassRequests: payload.gatePassRequests?.length
+      ? payload.gatePassRequests
+      : seedState.gatePassRequests,
   };
 }
 
@@ -728,6 +867,9 @@ export default function RecruitmentOS() {
   const [qrScanTime, setQrScanTime] = useState("10:00");
   const [qrPin, setQrPin] = useState("");
   const [qrError, setQrError] = useState("");
+  const [qrLocationText, setQrLocationText] = useState("Location not captured");
+  const [qrMapLink, setQrMapLink] = useState("");
+  const [qrLocationStatus, setQrLocationStatus] = useState("Tap location before marking attendance.");
   const [qrMessage, setQrMessage] = useState("");
 
   useEffect(() => {
@@ -828,6 +970,7 @@ export default function RecruitmentOS() {
   );
 
   const isBoss = loggedInMemberId === "m1";
+  const isSonali = loggedInMemberId === "m2";
   const isAdmin = loggedInMemberId === "m1" || loggedInMemberId === "m2";
   const visibleViews = loggedInProfile?.access ?? defaultViews;
   const assignableMembers = isAdmin
@@ -847,6 +990,12 @@ export default function RecruitmentOS() {
   const visibleLeaveRequests = isBoss
     ? state.leaveRequests
     : state.leaveRequests.filter((leave) => leave.member === loggedInMember?.name);
+  const visibleGatePassRequests = isAdmin
+    ? state.gatePassRequests
+    : state.gatePassRequests.filter((pass) => pass.member === loggedInMember?.name);
+  const attendanceAlerts = state.attendanceLogs.filter(
+    (log) => log.method === "QR Scan" && log.verification === "Pending",
+  );
 
   function ownedName(form: FormData, field = "owner") {
     if (!isAdmin) return loggedInMember?.name || activeMember?.name || "Team";
@@ -890,6 +1039,12 @@ export default function RecruitmentOS() {
     const pendingLeaves = state.leaveRequests.filter(
       (item) => item.status === "Pending",
     );
+    const pendingGatePasses = state.gatePassRequests.filter(
+      (item) => item.status === "Pending",
+    );
+    const pendingAttendance = state.attendanceLogs.filter(
+      (item) => item.method === "QR Scan" && item.verification === "Pending",
+    );
     const discipline =
       state.members.reduce((sum, member) => sum + scoreMember(member), 0) /
       Math.max(state.members.length, 1);
@@ -909,6 +1064,8 @@ export default function RecruitmentOS() {
       attendanceMarked: todayAttendance.length,
       lateToday: lateToday.length,
       pendingLeaves: pendingLeaves.length,
+      pendingGatePasses: pendingGatePasses.length,
+      pendingAttendance: pendingAttendance.length,
     };
   }, [state]);
 
@@ -954,8 +1111,28 @@ export default function RecruitmentOS() {
           title: `${item.member}: ${item.fromDate} to ${item.toDate}`,
           owner: item.reason,
         })),
+      ...state.gatePassRequests
+        .filter((item) => item.status === "Pending")
+        .slice(0, 3)
+        .map((item) => ({
+          label: "Gate Pass",
+          title: `${item.member}: ${item.destination}`,
+          owner: item.reason,
+        })),
+      ...attendanceAlerts.slice(0, 3).map((item) => ({
+        label: "QR Alert",
+        title: `${item.member} marked attendance at ${item.checkIn}`,
+        owner: item.locationText || "Location not captured",
+      })),
     ],
-    [state.followUps, state.invoices, state.leaveRequests, state.tasks],
+    [
+      attendanceAlerts,
+      state.followUps,
+      state.gatePassRequests,
+      state.invoices,
+      state.leaveRequests,
+      state.tasks,
+    ],
   );
 
   function addClient(event: FormEvent<HTMLFormElement>) {
@@ -1195,12 +1372,93 @@ export default function RecruitmentOS() {
     }));
   }
 
+  function addGatePassRequest(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setState((current) => ({
+      ...current,
+      gatePassRequests: [
+        {
+          id: makeId("gate"),
+          member: ownedName(form, "member"),
+          destination: String(form.get("destination") || "Outside office"),
+          reason: String(form.get("reason") || "Gate pass requested."),
+          outTime: String(form.get("outTime") || getCurrentClockTime()),
+          expectedReturn: String(form.get("expectedReturn") || "Same day"),
+          status: "Pending",
+          requestedOn: getTodayDate(),
+          decidedBy: "",
+        },
+        ...current.gatePassRequests,
+      ],
+    }));
+    event.currentTarget.reset();
+  }
+
+  function updateGatePassStatus(id: string, status: GatePassRequest["status"]) {
+    if (!isSonali) return;
+
+    setState((current) => ({
+      ...current,
+      gatePassRequests: current.gatePassRequests.map((pass) =>
+        pass.id === id
+          ? {
+              ...pass,
+              status,
+              decidedBy: loggedInMember?.name || "Sonali Shingre Ma'am",
+            }
+          : pass,
+      ),
+    }));
+  }
+
+  function updateAttendanceVerification(
+    id: string,
+    verification: NonNullable<AttendanceLog["verification"]>,
+  ) {
+    if (!isAdmin) return;
+
+    setState((current) => ({
+      ...current,
+      attendanceLogs: current.attendanceLogs.map((log) =>
+        log.id === id ? { ...log, verification } : log,
+      ),
+    }));
+  }
+
+  function captureQrLocation() {
+    if (!navigator.geolocation) {
+      setQrLocationStatus("Location is not available on this phone.");
+      setQrLocationText("Location not available");
+      setQrMapLink("");
+      return;
+    }
+
+    setQrLocationStatus("Capturing phone location...");
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const { latitude, longitude, accuracy } = position.coords;
+        const locationText = `Location captured (${Math.round(accuracy)}m accuracy)`;
+        setQrLocationText(locationText);
+        setQrMapLink(`https://www.google.com/maps?q=${latitude},${longitude}`);
+        setQrLocationStatus("Location captured for Sagar sir and Sonali ma'am.");
+      },
+      () => {
+        setQrLocationText("Location permission not shared");
+        setQrMapLink("");
+        setQrLocationStatus("Location not shared. Boss/admin must verify manually.");
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 },
+    );
+  }
+
   function recordAttendance(
     memberName: string,
     checkIn: string,
     checkOut: string,
     status: AttendanceLog["status"],
     lateMinutes: number,
+    details: Partial<AttendanceLog> = {},
   ) {
     const today = getTodayDate();
     setState((current) => ({
@@ -1220,6 +1478,11 @@ export default function RecruitmentOS() {
           checkOut,
           status,
           lateMinutes,
+          method: details.method || "Manual",
+          verification: details.verification || "Verified",
+          locationText: details.locationText || "Manual entry",
+          mapLink: details.mapLink || "",
+          alertText: details.alertText || "",
         };
 
         if (existingIndex >= 0) {
@@ -1250,6 +1513,11 @@ export default function RecruitmentOS() {
       String(form.get("checkOut") || ""),
       status,
       Number(form.get("lateMinutes") || getLateMinutes(checkIn)),
+      {
+        method: "Manual",
+        verification: isAdmin ? "Verified" : "Pending",
+        locationText: isAdmin ? "Manual admin entry" : "Manual staff entry",
+      },
     );
     event.currentTarget.reset();
   }
@@ -1271,7 +1539,13 @@ export default function RecruitmentOS() {
     const lateMinutes = getLateMinutes(checkIn);
     const status: AttendanceLog["status"] = lateMinutes > 0 ? "Late" : "On time";
 
-    recordAttendance(member.name, checkIn, "", status, lateMinutes);
+    recordAttendance(member.name, checkIn, "", status, lateMinutes, {
+      method: "QR Scan",
+      verification: "Pending",
+      locationText: qrLocationText,
+      mapLink: qrMapLink,
+      alertText: `QR attendance alert sent inside system to Sagar sir (+91 95614 18247) and Sonali ma'am (91561 33718).`,
+    });
     setActiveMemberId(member.id);
     setQrPin("");
     setQrError("");
@@ -1393,6 +1667,17 @@ export default function RecruitmentOS() {
               type="password"
               value={qrPin}
             />
+            <button
+              className="secondary-button"
+              onClick={captureQrLocation}
+              type="button"
+            >
+              Capture Phone Location
+            </button>
+            <div className="scan-summary">
+              <strong>Location proof</strong>
+              <span>{qrLocationStatus}</span>
+            </div>
             <div className="scan-summary">
               <strong>{qrMember.name}</strong>
               <span>
@@ -1621,6 +1906,7 @@ export default function RecruitmentOS() {
               <Metric label="Open tasks" value={metrics.openTasks} detail={`${metrics.blockedTasks} blocked`} />
               <Metric label="Attendance" value={metrics.attendanceMarked} detail={`${metrics.lateToday} late today`} />
               <Metric label="Leave requests" value={metrics.pendingLeaves} detail="waiting for boss" />
+              <Metric label="Gate passes" value={metrics.pendingGatePasses} detail="waiting for Sonali" />
               <Metric label="Active clients" value={metrics.activeClients} detail="live accounts" />
               <Metric label="Open positions" value={metrics.totalPositions} detail="to be closed" />
               <Metric label="Pending money" value={`Rs ${metrics.pendingAmount.toLocaleString("en-IN")}`} detail="not paid yet" />
@@ -1691,6 +1977,7 @@ export default function RecruitmentOS() {
                   {[
                     "Check late marks and weak target scores.",
                     "Grant or reject pending leave requests.",
+                    "Check gate pass movement with Sonali ma'am.",
                     "Close or reassign blocked tasks.",
                     "Review pending invoices and payment calls.",
                     "Confirm tomorrow's top client and vacancy priorities.",
@@ -2108,26 +2395,76 @@ export default function RecruitmentOS() {
                   <span>Staff</span>
                   <span>Date</span>
                   <span>In</span>
-                  <span>Out</span>
                   <span>Status</span>
-                  <span>Late</span>
+                  <span>Verify</span>
+                  <span>Proof</span>
                 </div>
                 {visibleAttendanceLogs.map((log) => (
                   <div className="table-row" key={log.id}>
                     <span><strong>{log.member}</strong></span>
                     <span>{log.date}</span>
                     <span>{log.checkIn}</span>
-                    <span>{log.checkOut || "-"}</span>
                     <span className={`attendance ${log.status.toLowerCase().replace(" ", "-")}`}>
                       {log.status}
                     </span>
-                    <span>{log.lateMinutes} min</span>
+                    <span className={`permission ${(log.verification || "Verified").toLowerCase()}`}>
+                      {log.verification || "Verified"}
+                    </span>
+                    <span>
+                      {log.mapLink ? (
+                        <a href={log.mapLink} target="_blank" rel="noreferrer">
+                          Map proof
+                        </a>
+                      ) : (
+                        <small>{log.locationText || `${log.lateMinutes} min late`}</small>
+                      )}
+                    </span>
                   </div>
                 ))}
               </div>
             </div>
 
             <div className="panel">
+              {isAdmin && (
+                <div className="alert-panel">
+                  <PanelHeader title="Attendance Alerts" label="Sagar + Sonali" />
+                  {attendanceAlerts.length ? (
+                    attendanceAlerts.map((log) => (
+                      <article className="alert-card" key={`${log.id}-alert`}>
+                        <strong>{log.member}</strong>
+                        <span>{log.checkIn} / {log.locationText || "Location not captured"}</span>
+                        {log.mapLink && (
+                          <a href={log.mapLink} target="_blank" rel="noreferrer">
+                            Open map proof
+                          </a>
+                        )}
+                        <small>{log.alertText || "QR attendance alert pending."}</small>
+                        <div className="decision-actions">
+                          <button
+                            className="grant-button"
+                            onClick={() => updateAttendanceVerification(log.id, "Verified")}
+                            type="button"
+                          >
+                            Verify
+                          </button>
+                          <button
+                            className="reject-button"
+                            onClick={() => updateAttendanceVerification(log.id, "Rejected")}
+                            type="button"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      </article>
+                    ))
+                  ) : (
+                    <article className="alert-card">
+                      <strong>No QR alert pending</strong>
+                      <span>New scans will appear here for checking.</span>
+                    </article>
+                  )}
+                </div>
+              )}
               <PanelHeader title="Mark Attendance" label="Phone check-in entry" />
               <div className="qr-print-card">
                 <img
@@ -2260,6 +2597,91 @@ export default function RecruitmentOS() {
                   <span>Your leave is pending until Sagar sir marks it Granted.</span>
                 </div>
               )}
+            </div>
+          </section>
+        )}
+
+        {activeView === "Gate Pass" && (
+          <section className="board-grid">
+            <div className="panel wide">
+              <PanelHeader
+                title="Gate Pass Board"
+                label={isSonali ? "Sonali approval queue" : "Office movement control"}
+              />
+              <div className="data-table gate-table">
+                <div className="table-head">
+                  <span>Staff</span>
+                  <span>Destination</span>
+                  <span>Out / Return</span>
+                  <span>Status</span>
+                  <span>Approval</span>
+                </div>
+                {visibleGatePassRequests.map((pass) => (
+                  <div className="table-row" key={pass.id}>
+                    <span>
+                      <strong>{pass.member}</strong>
+                      <small>Requested {pass.requestedOn}</small>
+                    </span>
+                    <span>
+                      <strong>{pass.destination}</strong>
+                      <small>{pass.reason}</small>
+                    </span>
+                    <span>{pass.outTime} / {pass.expectedReturn}</span>
+                    <span className={`permission ${pass.status.toLowerCase()}`}>
+                      {pass.status}
+                    </span>
+                    <span>
+                      {isSonali && pass.status === "Pending" ? (
+                        <div className="decision-actions">
+                          <button
+                            className="grant-button"
+                            onClick={() => updateGatePassStatus(pass.id, "Granted")}
+                            type="button"
+                          >
+                            Grant
+                          </button>
+                          <button
+                            className="reject-button"
+                            onClick={() => updateGatePassStatus(pass.id, "Rejected")}
+                            type="button"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : (
+                        <small>{pass.decidedBy || "Waiting for Sonali ma'am"}</small>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="panel">
+              <PanelHeader title="Request Gate Pass" label="Before leaving office" />
+              <form className="form-stack" onSubmit={addGatePassRequest}>
+                {isAdmin ? (
+                  <select name="member" aria-label="Gate pass member" defaultValue={activeMember?.name}>
+                    {state.members.map((member) => (
+                      <option key={member.id}>{member.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="identity-lock form-lock">
+                    <span>Request by</span>
+                    <strong>{loggedInMember?.name}</strong>
+                  </div>
+                )}
+                <input name="destination" placeholder="Where are you going?" />
+                <textarea name="reason" placeholder="Reason for gate pass" rows={3} />
+                <input name="outTime" placeholder="Out time, e.g. 03:30 PM" />
+                <input name="expectedReturn" placeholder="Expected return, e.g. 05:30 PM" />
+                <button type="submit">Submit Gate Pass</button>
+              </form>
+              <div className="access-note">
+                <strong>Approval rule</strong>
+                <span>Gate pass is valid only after Sonali ma'am marks it Granted.</span>
+              </div>
             </div>
           </section>
         )}
