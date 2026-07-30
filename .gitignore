@@ -39,6 +39,10 @@ yarn-error.log*
 # typescript
 next-env.d.ts
 /dist/
+/netlify-dist/
 /.wrangler/
 /outputs/
 /work/
+
+# temporary generated QR print files
+/ltsv-office-attendance-*.png
