@@ -133,6 +133,17 @@ type AttendanceLog = {
   lateMinutes: number;
 };
 
+type LeaveRequest = {
+  id: string;
+  member: string;
+  fromDate: string;
+  toDate: string;
+  reason: string;
+  status: "Pending" | "Granted" | "Rejected";
+  requestedOn: string;
+  decidedBy: string;
+};
+
 type OfficeState = {
   members: Member[];
   clients: Client[];
@@ -143,6 +154,7 @@ type OfficeState = {
   invoices: Invoice[];
   tasks: Task[];
   attendanceLogs: AttendanceLog[];
+  leaveRequests: LeaveRequest[];
 };
 
 type LoginProfile = {
@@ -452,6 +464,18 @@ const seedState: OfficeState = {
       lateMinutes: 11,
     },
   ],
+  leaveRequests: [
+    {
+      id: "lv1",
+      member: "Preeti",
+      fromDate: getTodayDate(),
+      toDate: getTodayDate(),
+      reason: "Personal work for half day permission.",
+      status: "Pending",
+      requestedOn: getTodayDate(),
+      decidedBy: "",
+    },
+  ],
 };
 
 const stages: Candidate["stage"][] = [
@@ -517,6 +541,7 @@ const loginProfiles: LoginProfile[] = [
       "Team",
       "Tasks",
       "Attendance",
+      "Leave",
       "Money",
       "Reports",
     ],
@@ -531,28 +556,29 @@ const loginProfiles: LoginProfile[] = [
       "Team",
       "Tasks",
       "Attendance",
+      "Leave",
       "Reports",
     ],
   },
   {
     memberId: "m3",
     pin: "925684",
-    access: ["Launch", "Control", "Clients", "Tasks", "Attendance", "Reports"],
+    access: ["Launch", "Control", "Clients", "Tasks", "Attendance", "Leave", "Reports"],
   },
   {
     memberId: "m4",
     pin: "384761",
-    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Reports"],
+    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Reports"],
   },
   {
     memberId: "m5",
     pin: "617493",
-    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Reports"],
+    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Reports"],
   },
   {
     memberId: "m6",
     pin: "852136",
-    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Reports"],
+    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Reports"],
   },
 ];
 
@@ -565,6 +591,7 @@ const defaultViews = [
   "Team",
   "Tasks",
   "Attendance",
+  "Leave",
   "Money",
   "Reports",
 ];
@@ -572,6 +599,7 @@ const defaultViews = [
 const launchChecklist = [
   "Every staff member logs in from their own phone before work starts.",
   "Office QR is pasted near the entrance and attendance starts through scan.",
+  "Leave permission must be requested in the system and approved by Sagar sir.",
   "Sagar sir assigns daily priorities from Control and Follow-ups.",
   "BDO updates client approach, permission, meeting, and agreement stages.",
   "Recruiter and coordinators update candidate stages before evening review.",
@@ -594,6 +622,7 @@ const launchRules = [
   "Candidate movement must follow the defined pipeline stages.",
   "Client status must move from approach to agreement to active account.",
   "Late, absent, weak target, and pending payment items are reviewed weekly.",
+  "No leave is counted as approved until boss marks it Granted.",
 ];
 
 function makeId(prefix: string) {
@@ -646,6 +675,9 @@ function normalizeOfficeState(payload: OfficeState): OfficeState {
     attendanceLogs: payload.attendanceLogs?.length
       ? payload.attendanceLogs
       : seedState.attendanceLogs,
+    leaveRequests: payload.leaveRequests?.length
+      ? payload.leaveRequests
+      : seedState.leaveRequests,
   };
 }
 
@@ -812,6 +844,9 @@ export default function RecruitmentOS() {
   const visibleReports = isAdmin
     ? state.reports
     : state.reports.filter((report) => report.member === loggedInMember?.name);
+  const visibleLeaveRequests = isBoss
+    ? state.leaveRequests
+    : state.leaveRequests.filter((leave) => leave.member === loggedInMember?.name);
 
   function ownedName(form: FormData, field = "owner") {
     if (!isAdmin) return loggedInMember?.name || activeMember?.name || "Team";
@@ -852,6 +887,9 @@ export default function RecruitmentOS() {
       (item) => item.date === today,
     );
     const lateToday = todayAttendance.filter((item) => item.status === "Late");
+    const pendingLeaves = state.leaveRequests.filter(
+      (item) => item.status === "Pending",
+    );
     const discipline =
       state.members.reduce((sum, member) => sum + scoreMember(member), 0) /
       Math.max(state.members.length, 1);
@@ -870,6 +908,7 @@ export default function RecruitmentOS() {
       blockedTasks: blockedTasks.length,
       attendanceMarked: todayAttendance.length,
       lateToday: lateToday.length,
+      pendingLeaves: pendingLeaves.length,
     };
   }, [state]);
 
@@ -907,8 +946,16 @@ export default function RecruitmentOS() {
           title: `${item.company} - Rs ${item.amount.toLocaleString("en-IN")}`,
           owner: item.owner,
         })),
+      ...state.leaveRequests
+        .filter((item) => item.status === "Pending")
+        .slice(0, 3)
+        .map((item) => ({
+          label: "Leave",
+          title: `${item.member}: ${item.fromDate} to ${item.toDate}`,
+          owner: item.reason,
+        })),
     ],
-    [state.followUps, state.invoices, state.tasks],
+    [state.followUps, state.invoices, state.leaveRequests, state.tasks],
   );
 
   function addClient(event: FormEvent<HTMLFormElement>) {
@@ -1107,6 +1154,45 @@ export default function RecruitmentOS() {
       ],
     }));
     event.currentTarget.reset();
+  }
+
+  function addLeaveRequest(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    const form = new FormData(event.currentTarget);
+    setState((current) => ({
+      ...current,
+      leaveRequests: [
+        {
+          id: makeId("leave"),
+          member: ownedName(form, "member"),
+          fromDate: String(form.get("fromDate") || getTodayDate()),
+          toDate: String(form.get("toDate") || form.get("fromDate") || getTodayDate()),
+          reason: String(form.get("reason") || "Leave permission requested."),
+          status: "Pending",
+          requestedOn: getTodayDate(),
+          decidedBy: "",
+        },
+        ...current.leaveRequests,
+      ],
+    }));
+    event.currentTarget.reset();
+  }
+
+  function updateLeaveStatus(id: string, status: LeaveRequest["status"]) {
+    if (!isBoss) return;
+
+    setState((current) => ({
+      ...current,
+      leaveRequests: current.leaveRequests.map((leave) =>
+        leave.id === id
+          ? {
+              ...leave,
+              status,
+              decidedBy: loggedInMember?.name || "Sagar Sonawane",
+            }
+          : leave,
+      ),
+    }));
   }
 
   function recordAttendance(
@@ -1534,6 +1620,7 @@ export default function RecruitmentOS() {
               <Metric label="Discipline" value={`${metrics.discipline}%`} detail="team target score" />
               <Metric label="Open tasks" value={metrics.openTasks} detail={`${metrics.blockedTasks} blocked`} />
               <Metric label="Attendance" value={metrics.attendanceMarked} detail={`${metrics.lateToday} late today`} />
+              <Metric label="Leave requests" value={metrics.pendingLeaves} detail="waiting for boss" />
               <Metric label="Active clients" value={metrics.activeClients} detail="live accounts" />
               <Metric label="Open positions" value={metrics.totalPositions} detail="to be closed" />
               <Metric label="Pending money" value={`Rs ${metrics.pendingAmount.toLocaleString("en-IN")}`} detail="not paid yet" />
@@ -1603,6 +1690,7 @@ export default function RecruitmentOS() {
                 <div className="check-list">
                   {[
                     "Check late marks and weak target scores.",
+                    "Grant or reject pending leave requests.",
                     "Close or reassign blocked tasks.",
                     "Review pending invoices and payment calls.",
                     "Confirm tomorrow's top client and vacancy priorities.",
@@ -2079,6 +2167,99 @@ export default function RecruitmentOS() {
                 <input name="lateMinutes" placeholder="Late minutes" type="number" min="0" />
                 <button type="submit">Mark Attendance</button>
               </form>
+            </div>
+          </section>
+        )}
+
+        {activeView === "Leave" && (
+          <section className="board-grid">
+            <div className="panel wide">
+              <PanelHeader
+                title="Leave Permission Board"
+                label={isBoss ? "Boss approval queue" : "My leave requests"}
+              />
+              <div className="data-table leave-table">
+                <div className="table-head">
+                  <span>Staff</span>
+                  <span>Dates</span>
+                  <span>Reason</span>
+                  <span>Status</span>
+                  <span>Boss decision</span>
+                </div>
+                {visibleLeaveRequests.map((leave) => (
+                  <div className="table-row" key={leave.id}>
+                    <span>
+                      <strong>{leave.member}</strong>
+                      <small>Requested {leave.requestedOn}</small>
+                    </span>
+                    <span>{leave.fromDate} to {leave.toDate}</span>
+                    <span>{leave.reason}</span>
+                    <span className={`permission ${leave.status.toLowerCase()}`}>
+                      {leave.status}
+                    </span>
+                    <span>
+                      {isBoss && leave.status === "Pending" ? (
+                        <div className="decision-actions">
+                          <button
+                            className="grant-button"
+                            onClick={() => updateLeaveStatus(leave.id, "Granted")}
+                            type="button"
+                          >
+                            Grant
+                          </button>
+                          <button
+                            className="reject-button"
+                            onClick={() => updateLeaveStatus(leave.id, "Rejected")}
+                            type="button"
+                          >
+                            Reject
+                          </button>
+                        </div>
+                      ) : (
+                        <small>{leave.decidedBy || "Waiting for Sagar sir"}</small>
+                      )}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="panel">
+              <PanelHeader title="Request Leave" label="Send to boss" />
+              <form className="form-stack" onSubmit={addLeaveRequest}>
+                {isBoss ? (
+                  <select name="member" aria-label="Leave request member" defaultValue={activeMember?.name}>
+                    {state.members.map((member) => (
+                      <option key={member.id}>{member.name}</option>
+                    ))}
+                  </select>
+                ) : (
+                  <div className="identity-lock form-lock">
+                    <span>Request by</span>
+                    <strong>{loggedInMember?.name}</strong>
+                  </div>
+                )}
+                <label className="time-field">
+                  <span>From date</span>
+                  <input name="fromDate" type="date" />
+                </label>
+                <label className="time-field">
+                  <span>To date</span>
+                  <input name="toDate" type="date" />
+                </label>
+                <textarea
+                  name="reason"
+                  placeholder="Reason for leave permission"
+                  rows={4}
+                />
+                <button type="submit">Submit Leave Request</button>
+              </form>
+              {!isBoss && (
+                <div className="access-note">
+                  <strong>Approval rule</strong>
+                  <span>Your leave is pending until Sagar sir marks it Granted.</span>
+                </div>
+              )}
             </div>
           </section>
         )}

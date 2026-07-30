@@ -937,6 +937,11 @@ textarea {
   grid-template-columns: minmax(160px, 1.1fr) 110px 80px 80px 110px 80px;
 }
 
+.leave-table .table-head,
+.leave-table .table-row {
+  grid-template-columns: minmax(150px, 0.9fr) 150px minmax(220px, 1.4fr) 110px 170px;
+}
+
 .priority {
   border-radius: 999px;
   display: inline-flex;
@@ -1056,6 +1061,54 @@ textarea {
   color: var(--blue);
 }
 
+.permission {
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 900;
+  justify-content: center;
+  padding: 7px 10px;
+  width: fit-content;
+}
+
+.permission.pending {
+  background: var(--amber-soft);
+  color: var(--amber);
+}
+
+.permission.granted {
+  background: var(--green-soft);
+  color: var(--green);
+}
+
+.permission.rejected {
+  background: var(--red-soft);
+  color: var(--red);
+}
+
+.decision-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.decision-actions button {
+  border: 0;
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+  min-height: 34px;
+  padding: 0 12px;
+}
+
+.grant-button {
+  background: var(--green);
+}
+
+.reject-button {
+  background: var(--red);
+}
+
 .report-card {
   padding: 14px;
 }
@@ -1149,6 +1202,8 @@ textarea {
   .task-table .table-row,
   .attendance-table .table-head,
   .attendance-table .table-row,
+  .leave-table .table-head,
+  .leave-table .table-row,
   .pipeline-bar {
     grid-template-columns: 1fr;
   }

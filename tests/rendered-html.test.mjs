@@ -23,6 +23,11 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /CEO Risk Queue/);
   assert.match(app, /Task Assignment Board/);
   assert.match(app, /Attendance and Late Mark/);
+  assert.match(app, /Leave Permission Board/);
+  assert.match(app, /Request Leave/);
+  assert.match(app, /Submit Leave Request/);
+  assert.match(app, /Grant/);
+  assert.match(app, /Reject/);
   assert.match(app, /QR Attendance/);
   assert.match(app, /Office QR Code/);
   assert.match(app, /Mark My Attendance/);
@@ -45,6 +50,8 @@ test("contains the recruitment office operating system", async () => {
   assert.match(css, /\.qr-shell/);
   assert.match(css, /\.identity-lock/);
   assert.match(css, /\.access-note/);
+  assert.match(css, /\.leave-table/);
+  assert.match(css, /\.decision-actions/);
   assert.doesNotMatch(app + layout + css, /Your site is taking shape|Codex is working|codex-preview/);
 });
 
