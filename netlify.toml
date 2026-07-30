@@ -2,6 +2,10 @@
   command = "pnpm run build:netlify"
   publish = "netlify-dist"
 
+[build.environment]
+  NETLIFY_NEXT_PLUGIN_SKIP = "true"
+  NODE_VERSION = "22"
+
 [functions]
   directory = "netlify/functions"
 
