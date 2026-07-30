@@ -51,6 +51,8 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /Invoice and Payment Tracker/);
   assert.match(app, /Quick Staff Update/);
   assert.match(app, /Agreement Sent/);
+  assert.match(app, /Rohan Dangle/);
+  assert.doesNotMatch(app.replace(/function normalizeStaffName[\s\S]*?\n}\n/, ""), /Rohan Dongre/);
   assert.match(app, /Satish Khillare/);
   assert.match(app, /Vaishnavi Borhade/);
   assert.match(app, /Gayatri Pawar/);

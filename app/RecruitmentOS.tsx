@@ -227,7 +227,7 @@ const seedState: OfficeState = {
     },
     {
       id: "m4",
-      name: "Rohan Dongre",
+      name: "Rohan Dangle",
       role: "Recruiter",
       desk: "Sourcing to joining",
       responsibility:
@@ -368,7 +368,7 @@ const seedState: OfficeState = {
       salary: "As per company budget",
       priority: "High",
       status: "Interview",
-      owner: "Rohan Dongre",
+      owner: "Rohan Dangle",
     },
     {
       id: "r2",
@@ -399,7 +399,7 @@ const seedState: OfficeState = {
       phone: "98xxxxxx10",
       city: "Nashik",
       stage: "Interview Scheduled",
-      owner: "Rohan Dongre",
+      owner: "Rohan Dangle",
       company: "Press Metal Industries",
     },
     {
@@ -426,7 +426,7 @@ const seedState: OfficeState = {
       id: "f2",
       type: "Joining",
       title: "Confirm Press Metal interview schedule",
-      owner: "Rohan Dongre",
+      owner: "Rohan Dangle",
       due: "Today",
       status: "Pending",
     },
@@ -434,7 +434,7 @@ const seedState: OfficeState = {
       id: "f3",
       type: "Payment",
       title: "Prepare invoice status after joining confirmation",
-      owner: "Rohan Dongre",
+      owner: "Rohan Dangle",
       due: "Tomorrow",
       status: "Pending",
     },
@@ -463,7 +463,7 @@ const seedState: OfficeState = {
       company: "Press Metal Industries",
       candidate: "Sample Candidate 1",
       amount: 12500,
-      owner: "Rohan Dongre",
+      owner: "Rohan Dangle",
       status: "Draft",
       due: "After joining",
     },
@@ -481,7 +481,7 @@ const seedState: OfficeState = {
     {
       id: "t1",
       title: "Confirm Press Metal interview batch",
-      owner: "Rohan Dongre",
+      owner: "Rohan Dangle",
       assignedBy: "Sagar Sonawane",
       due: "Today 3:00 PM",
       priority: "High",
@@ -536,7 +536,7 @@ const seedState: OfficeState = {
     },
     {
       id: "a3",
-      member: "Rohan Dongre",
+      member: "Rohan Dangle",
       date: getTodayDate(),
       checkIn: "10:11",
       checkOut: "",
@@ -776,8 +776,15 @@ function isLegacyDemoData(payload: OfficeState) {
   );
 }
 
+function normalizeStaffName(name: string) {
+  return name.replace(/Rohan Dongre/g, "Rohan Dangle");
+}
+
 function mergeSeedMembers(members: Member[]) {
-  const loadedMembers = members.length ? members : seedState.members;
+  const loadedMembers = (members.length ? members : seedState.members).map((member) => ({
+    ...member,
+    name: normalizeStaffName(member.name),
+  }));
   const existingIds = new Set(loadedMembers.map((member) => member.id));
   const existingNames = new Set(
     loadedMembers.map((member) => member.name.toLowerCase()),
@@ -801,21 +808,61 @@ function normalizeOfficeState(payload: OfficeState): OfficeState {
       status: client.status === "Agreement" ? "Agreement Sent" : client.status,
     })),
     requirements: payload.requirements?.length
-      ? payload.requirements
+      ? payload.requirements.map((requirement) => ({
+          ...requirement,
+          owner: normalizeStaffName(requirement.owner),
+        }))
       : seedState.requirements,
-    candidates: payload.candidates?.length ? payload.candidates : seedState.candidates,
-    followUps: payload.followUps?.length ? payload.followUps : seedState.followUps,
-    reports: payload.reports?.length ? payload.reports : seedState.reports,
-    invoices: payload.invoices?.length ? payload.invoices : seedState.invoices,
-    tasks: payload.tasks?.length ? payload.tasks : seedState.tasks,
+    candidates: payload.candidates?.length
+      ? payload.candidates.map((candidate) => ({
+          ...candidate,
+          owner: normalizeStaffName(candidate.owner),
+        }))
+      : seedState.candidates,
+    followUps: payload.followUps?.length
+      ? payload.followUps.map((followUp) => ({
+          ...followUp,
+          owner: normalizeStaffName(followUp.owner),
+        }))
+      : seedState.followUps,
+    reports: payload.reports?.length
+      ? payload.reports.map((report) => ({
+          ...report,
+          member: normalizeStaffName(report.member),
+        }))
+      : seedState.reports,
+    invoices: payload.invoices?.length
+      ? payload.invoices.map((invoice) => ({
+          ...invoice,
+          owner: normalizeStaffName(invoice.owner),
+        }))
+      : seedState.invoices,
+    tasks: payload.tasks?.length
+      ? payload.tasks.map((task) => ({
+          ...task,
+          owner: normalizeStaffName(task.owner),
+          assignedBy: normalizeStaffName(task.assignedBy),
+        }))
+      : seedState.tasks,
     attendanceLogs: payload.attendanceLogs?.length
-      ? payload.attendanceLogs
+      ? payload.attendanceLogs.map((log) => ({
+          ...log,
+          member: normalizeStaffName(log.member),
+        }))
       : seedState.attendanceLogs,
     leaveRequests: payload.leaveRequests?.length
-      ? payload.leaveRequests
+      ? payload.leaveRequests.map((leave) => ({
+          ...leave,
+          member: normalizeStaffName(leave.member),
+          decidedBy: normalizeStaffName(leave.decidedBy),
+        }))
       : seedState.leaveRequests,
     gatePassRequests: payload.gatePassRequests?.length
-      ? payload.gatePassRequests
+      ? payload.gatePassRequests.map((pass) => ({
+          ...pass,
+          member: normalizeStaffName(pass.member),
+          decidedBy: normalizeStaffName(pass.decidedBy),
+        }))
       : seedState.gatePassRequests,
   };
 }
