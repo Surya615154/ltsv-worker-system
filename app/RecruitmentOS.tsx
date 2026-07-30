@@ -2,15 +2,13 @@
 
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
-const attendanceQrLink =
-  "https://ltsv-worker-system.suryawanshivishal625.chatgpt.site/?attendance=qr";
-const attendanceQrImage =
-  "https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=16&data=https%3A%2F%2Fltsv-worker-system.suryawanshivishal625.chatgpt.site%2F%3Fattendance%3Dqr";
+const attendanceQrPath = "/?attendance=qr";
 const officeStartTime = "10:00";
 
 type Member = {
   id: string;
   name: string;
+  email: string;
   role: string;
   desk: string;
   responsibility: string;
@@ -186,6 +184,7 @@ const seedState: OfficeState = {
     {
       id: "m1",
       name: "Sagar Sonawane",
+      email: "innashik.in@gmail.com",
       role: "Director / Owner",
       desk: "Boss control",
       responsibility:
@@ -200,6 +199,7 @@ const seedState: OfficeState = {
     {
       id: "m2",
       name: "Sonali Shingre Ma'am",
+      email: "shingresonali29@gmail.com",
       role: "HR Head / Admin",
       desk: "HR and candidate handling",
       responsibility:
@@ -214,6 +214,7 @@ const seedState: OfficeState = {
     {
       id: "m3",
       name: "Vishwatej Suryawanshi",
+      email: "suryawanshivishal625@gmail.com",
       role: "BDO",
       desk: "Company approach",
       responsibility:
@@ -228,6 +229,7 @@ const seedState: OfficeState = {
     {
       id: "m4",
       name: "Rohan Dangle",
+      email: "hr.rohandangeltsv@gmail.com",
       role: "Recruiter",
       desk: "Sourcing to joining",
       responsibility:
@@ -242,6 +244,7 @@ const seedState: OfficeState = {
     {
       id: "m5",
       name: "Laxmi",
+      email: "hr.laxmimanmotheltsv@gmail.com",
       role: "Coordinator",
       desk: "Candidate application calling",
       responsibility:
@@ -256,6 +259,7 @@ const seedState: OfficeState = {
     {
       id: "m6",
       name: "Preeti",
+      email: "hr.pritidawandeltsv@gmail.com",
       role: "Coordinator",
       desk: "Candidate application calling",
       responsibility:
@@ -270,6 +274,7 @@ const seedState: OfficeState = {
     {
       id: "m7",
       name: "Satish Khillare",
+      email: "satishkhillare770@gmail.com",
       role: "BDM",
       desk: "Business development",
       responsibility:
@@ -284,6 +289,7 @@ const seedState: OfficeState = {
     {
       id: "m8",
       name: "Vaishnavi Borhade",
+      email: "vaishnaviborhade50@gmail.com",
       role: "BRE",
       desk: "Business relationship",
       responsibility:
@@ -298,6 +304,7 @@ const seedState: OfficeState = {
     {
       id: "m9",
       name: "Gayatri Pawar",
+      email: "gp303326@gmail.com",
       role: "CRE",
       desk: "Customer relationship",
       responsibility:
@@ -312,6 +319,7 @@ const seedState: OfficeState = {
     {
       id: "m10",
       name: "Nandini",
+      email: "ghegadmalnandini@gmail.com",
       role: "Team Leader Finance",
       desk: "Finance control",
       responsibility:
@@ -780,10 +788,20 @@ function normalizeStaffName(name: string) {
   return name.replace(/Rohan Dongre/g, "Rohan Dangle");
 }
 
+function getSeedMemberEmail(member: Member) {
+  const normalizedName = normalizeStaffName(member.name).toLowerCase();
+  const seedMember = seedState.members.find(
+    (item) => item.id === member.id || item.name.toLowerCase() === normalizedName,
+  );
+
+  return member.email || seedMember?.email || "";
+}
+
 function mergeSeedMembers(members: Member[]) {
   const loadedMembers = (members.length ? members : seedState.members).map((member) => ({
     ...member,
     name: normalizeStaffName(member.name),
+    email: getSeedMemberEmail(member),
   }));
   const existingIds = new Set(loadedMembers.map((member) => member.id));
   const existingNames = new Set(
@@ -918,6 +936,19 @@ export default function RecruitmentOS() {
   const [qrMapLink, setQrMapLink] = useState("");
   const [qrLocationStatus, setQrLocationStatus] = useState("Tap location before marking attendance.");
   const [qrMessage, setQrMessage] = useState("");
+  const attendanceQrLink = useMemo(() => {
+    const origin =
+      typeof window === "undefined"
+        ? "https://ltsv-worker-system.suryawanshivishal625.chatgpt.site"
+        : window.location.origin;
+
+    return `${origin}${attendanceQrPath}`;
+  }, []);
+  const attendanceQrImage = useMemo(
+    () =>
+      `https://api.qrserver.com/v1/create-qr-code/?size=320x320&margin=16&data=${encodeURIComponent(attendanceQrLink)}`,
+    [attendanceQrLink],
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -2311,6 +2342,7 @@ export default function RecruitmentOS() {
                     <span>
                       <strong>{member.name}</strong>
                       <small>{member.role} / {member.desk}</small>
+                      <small>{member.email}</small>
                     </span>
                     <span className={`attendance ${member.attendance.toLowerCase().replace(" ", "-")}`}>
                       {member.attendance}
@@ -2353,6 +2385,7 @@ export default function RecruitmentOS() {
                 <article className="role-card" key={`${member.id}-role`}>
                   <strong>{member.name}</strong>
                   <span>{member.role}</span>
+                  <small>{member.email}</small>
                   <p>{member.responsibility}</p>
                   <small>Target: {member.targetText}</small>
                 </article>
