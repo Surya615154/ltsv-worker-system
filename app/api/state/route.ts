@@ -2,6 +2,7 @@ import { env } from "cloudflare:workers";
 import { NextResponse } from "next/server";
 
 const initialPayload = {
+  resetVersion: "fresh-start-2026-08-01",
   members: [],
   clients: [],
   requirements: [],

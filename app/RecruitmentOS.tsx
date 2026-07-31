@@ -172,6 +172,7 @@ type SalarySlipAdjustment = {
 };
 
 type OfficeState = {
+  resetVersion: string;
   members: Member[];
   clients: Client[];
   requirements: Requirement[];
@@ -217,6 +218,7 @@ const companyPayrollInfo = {
 };
 
 const officialLaunchDate = "2026-08-01";
+const freshStartResetVersion = "fresh-start-2026-08-01";
 
 const salaryProfiles: SalaryProfile[] = [
   {
@@ -330,6 +332,7 @@ const salaryProfiles: SalaryProfile[] = [
 ];
 
 const seedState: OfficeState = {
+  resetVersion: freshStartResetVersion,
   members: [
     {
       id: "m1",
@@ -693,6 +696,10 @@ function hasOfficeData(payload: OfficeState) {
   );
 }
 
+function isOldSavedData(payload: OfficeState) {
+  return payload.resetVersion !== freshStartResetVersion;
+}
+
 function isLegacyDemoData(payload: OfficeState) {
   const memberNames = payload.members.map((member) => member.name).join(" ");
   const clientNames = payload.clients.map((client) => client.company).join(" ");
@@ -744,9 +751,14 @@ function isOnOrAfterLaunchDate(date: string) {
 }
 
 function normalizeOfficeState(payload: OfficeState): OfficeState {
+  if (isOldSavedData(payload)) {
+    return seedState;
+  }
+
   const clients = payload.clients?.length ? payload.clients : seedState.clients;
 
   return {
+    resetVersion: freshStartResetVersion,
     members: mergeSeedMembers(payload.members ?? []),
     clients: clients.map((client) => ({
       ...client,

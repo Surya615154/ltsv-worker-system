@@ -2,6 +2,7 @@ import { getStore } from "@netlify/blobs";
 
 const stateKey = "main";
 const initialPayload = {
+  resetVersion: "fresh-start-2026-08-01",
   members: [],
   clients: [],
   requirements: [],
