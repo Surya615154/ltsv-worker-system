@@ -50,9 +50,13 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /Candidate Tracker/);
   assert.match(app, /Invoice and Payment Tracker/);
   assert.match(app, /Quick Staff Update/);
+  assert.match(app, /Export Data/);
+  assert.match(app, /Download CSV/);
+  assert.match(app, /Download Full Backup/);
   assert.match(app, /Agreement Sent/);
   assert.match(app, /Rohan Dangle/);
   assert.doesNotMatch(app.replace(/function normalizeStaffName[\s\S]*?\n}\n/, ""), /Rohan Dongre/);
+  assert.doesNotMatch(app, /Sample Candidate 1/);
   assert.match(app, /Satish Khillare/);
   assert.match(app, /Vaishnavi Borhade/);
   assert.match(app, /Gayatri Pawar/);
@@ -66,6 +70,7 @@ test("contains the recruitment office operating system", async () => {
   assert.match(css, /\.gate-table/);
   assert.match(css, /\.alert-panel/);
   assert.match(css, /\.decision-actions/);
+  assert.match(css, /\.export-grid/);
   assert.doesNotMatch(app + layout + css, /Your site is taking shape|Codex is working|codex-preview/);
 });
 

@@ -179,6 +179,8 @@ type LoginProfile = {
   access: string[];
 };
 
+type ExportRow = Record<string, string | number>;
+
 const seedState: OfficeState = {
   members: [
     {
@@ -190,10 +192,10 @@ const seedState: OfficeState = {
       responsibility:
         "Check if everyone is working properly, assign roles, review activity, and take final decisions.",
       targetText: "Morning work allocation + evening review of every staff member",
-      attendance: "On time",
-      calls: 12,
+      attendance: "Absent",
+      calls: 0,
       cv: 0,
-      interviews: 2,
+      interviews: 0,
       target: 20,
     },
     {
@@ -205,10 +207,10 @@ const seedState: OfficeState = {
       responsibility:
         "Candidate handling, calling, vacancy finding, admin coordination, and HR process discipline.",
       targetText: "40 candidate/client coordination calls + vacancy update sheet",
-      attendance: "On time",
-      calls: 38,
-      cv: 8,
-      interviews: 3,
+      attendance: "Absent",
+      calls: 0,
+      cv: 0,
+      interviews: 0,
       target: 50,
     },
     {
@@ -219,9 +221,9 @@ const seedState: OfficeState = {
       desk: "Company approach",
       responsibility:
         "Company approach, permission calls, meeting scheduling, client visits, agreements, and business follow-up.",
-      attendance: "On time",
+      attendance: "Absent",
       targetText: "35 company calls + 5 hot follow-ups + 1 meeting/visit pipeline",
-      calls: 32,
+      calls: 0,
       cv: 0,
       interviews: 0,
       target: 35,
@@ -235,10 +237,10 @@ const seedState: OfficeState = {
       responsibility:
         "Screening, sourcing, interview scheduling, candidate follow-up, joining confirmation, and invoice generation.",
       targetText: "50 sourcing calls + 10 screened CVs + interview/joining follow-up",
-      attendance: "On time",
-      calls: 46,
-      cv: 10,
-      interviews: 5,
+      attendance: "Absent",
+      calls: 0,
+      cv: 0,
+      interviews: 0,
       target: 60,
     },
     {
@@ -250,9 +252,9 @@ const seedState: OfficeState = {
       responsibility:
         "Cold calling candidates, collecting applications, updating basic details, and forwarding interested candidates.",
       targetText: "80 candidate cold calls + 20 application entries",
-      attendance: "On time",
-      calls: 72,
-      cv: 14,
+      attendance: "Absent",
+      calls: 0,
+      cv: 0,
       interviews: 0,
       target: 85,
     },
@@ -265,9 +267,9 @@ const seedState: OfficeState = {
       responsibility:
         "Cold calling candidates, collecting applications, updating basic details, and forwarding interested candidates.",
       targetText: "80 candidate cold calls + 20 application entries",
-      attendance: "On time",
-      calls: 68,
-      cv: 12,
+      attendance: "Absent",
+      calls: 0,
+      cv: 0,
       interviews: 0,
       target: 85,
     },
@@ -280,8 +282,8 @@ const seedState: OfficeState = {
       responsibility:
         "Client development, company approach, meeting pipeline, and business relationship follow-up.",
       targetText: "35 company calls + 5 hot follow-ups + 1 active client movement",
-      attendance: "On time",
-      calls: 26,
+      attendance: "Absent",
+      calls: 0,
       cv: 0,
       interviews: 0,
       target: 35,
@@ -295,8 +297,8 @@ const seedState: OfficeState = {
       responsibility:
         "Relationship follow-up, client coordination, requirement tracking, and daily communication discipline.",
       targetText: "35 relationship calls + client follow-up updates",
-      attendance: "On time",
-      calls: 24,
+      attendance: "Absent",
+      calls: 0,
       cv: 0,
       interviews: 0,
       target: 35,
@@ -310,10 +312,10 @@ const seedState: OfficeState = {
       responsibility:
         "Candidate/client response handling, coordination calls, status updates, and service follow-up.",
       targetText: "45 coordination calls + daily status update",
-      attendance: "On time",
-      calls: 31,
-      cv: 4,
-      interviews: 1,
+      attendance: "Absent",
+      calls: 0,
+      cv: 0,
+      interviews: 0,
       target: 45,
     },
     {
@@ -325,261 +327,23 @@ const seedState: OfficeState = {
       responsibility:
         "Invoice tracking, payment follow-up, finance coordination, and collection reporting.",
       targetText: "Daily invoice review + payment follow-up report",
-      attendance: "On time",
-      calls: 18,
+      attendance: "Absent",
+      calls: 0,
       cv: 0,
       interviews: 0,
       target: 25,
     },
   ],
-  clients: [
-    {
-      id: "cl1",
-      company: "Press Metal Industries",
-      contact: "HR / Plant Admin",
-      city: "Nashik",
-      industry: "Manufacturing",
-      status: "Active",
-      model: "8.33% Annual CTC",
-      owner: "Vishwatej Suryawanshi",
-      nextFollowUp: "Today 4:30 PM",
-    },
-    {
-      id: "cl2",
-      company: "NMD",
-      contact: "HR Team",
-      city: "Nashik",
-      industry: "Multi-sector",
-      status: "Active",
-      model: "10% Monthly",
-      owner: "Sagar Sonawane",
-      nextFollowUp: "Tomorrow",
-    },
-    {
-      id: "cl3",
-      company: "Biolaxi Enzymes",
-      contact: "HR / Operations",
-      city: "Nashik",
-      industry: "Pharma / Biotech",
-      status: "Agreement Sent",
-      model: "60% One Month Salary",
-      owner: "Vishwatej Suryawanshi",
-      nextFollowUp: "This week",
-    },
-  ],
-  requirements: [
-    {
-      id: "r1",
-      title: "Production Operator",
-      company: "Press Metal Industries",
-      positions: 10,
-      salary: "As per company budget",
-      priority: "High",
-      status: "Interview",
-      owner: "Rohan Dangle",
-    },
-    {
-      id: "r2",
-      title: "Helper / Worker",
-      company: "NMD",
-      positions: 15,
-      salary: "As per requirement",
-      priority: "Medium",
-      status: "Sourcing",
-      owner: "Laxmi",
-    },
-    {
-      id: "r3",
-      title: "Lab Assistant",
-      company: "Biolaxi Enzymes",
-      positions: 3,
-      salary: "18k-25k",
-      priority: "High",
-      status: "Vacancy Found",
-      owner: "Sonali Shingre Ma'am",
-    },
-  ],
-  candidates: [
-    {
-      id: "ca1",
-      name: "Sample Candidate 1",
-      role: "Production Operator",
-      phone: "98xxxxxx10",
-      city: "Nashik",
-      stage: "Interview Scheduled",
-      owner: "Rohan Dangle",
-      company: "Press Metal Industries",
-    },
-    {
-      id: "ca2",
-      name: "Sample Candidate 2",
-      role: "Helper / Worker",
-      phone: "90xxxxxx22",
-      city: "Nashik",
-      stage: "Application",
-      owner: "Preeti",
-      company: "NMD",
-    },
-  ],
-  followUps: [
-    {
-      id: "f1",
-      type: "Client",
-      title: "Follow up with Biolaxi Enzymes for agreement confirmation",
-      owner: "Vishwatej Suryawanshi",
-      due: "Today",
-      status: "Pending",
-    },
-    {
-      id: "f2",
-      type: "Joining",
-      title: "Confirm Press Metal interview schedule",
-      owner: "Rohan Dangle",
-      due: "Today",
-      status: "Pending",
-    },
-    {
-      id: "f3",
-      type: "Payment",
-      title: "Prepare invoice status after joining confirmation",
-      owner: "Rohan Dangle",
-      due: "Tomorrow",
-      status: "Pending",
-    },
-    {
-      id: "f4",
-      type: "Candidate",
-      title: "Cold calling application batch update",
-      owner: "Laxmi / Preeti",
-      due: "Today",
-      status: "Pending",
-    },
-  ],
-  reports: [
-    {
-      id: "d1",
-      member: "Vishwatej Suryawanshi",
-      date: getTodayDate(),
-      completed: "Company calls, permission follow-ups, and meeting pipeline updated",
-      stuck: "Need decision on next client visit priority",
-      tomorrow: "Push agreement follow-up and schedule one client meeting",
-    },
-  ],
-  invoices: [
-    {
-      id: "i1",
-      company: "Press Metal Industries",
-      candidate: "Sample Candidate 1",
-      amount: 12500,
-      owner: "Rohan Dangle",
-      status: "Draft",
-      due: "After joining",
-    },
-    {
-      id: "i2",
-      company: "NMD",
-      candidate: "Joining batch",
-      amount: 18000,
-      owner: "Sagar Sonawane",
-      status: "Payment Pending",
-      due: "This week",
-    },
-  ],
-  tasks: [
-    {
-      id: "t1",
-      title: "Confirm Press Metal interview batch",
-      owner: "Rohan Dangle",
-      assignedBy: "Sagar Sonawane",
-      due: "Today 3:00 PM",
-      priority: "High",
-      status: "In Progress",
-      notes: "Candidate calls and timing confirmation before client update.",
-    },
-    {
-      id: "t2",
-      title: "Schedule Biolaxi agreement follow-up",
-      owner: "Vishwatej Suryawanshi",
-      assignedBy: "Sagar Sonawane",
-      due: "Today",
-      priority: "High",
-      status: "Assigned",
-      notes: "Move from agreement sent to agreement signed.",
-    },
-    {
-      id: "t3",
-      title: "Collect 20 fresh application entries",
-      owner: "Laxmi",
-      assignedBy: "Sonali Shingre Ma'am",
-      due: "Today 5:00 PM",
-      priority: "Medium",
-      status: "Assigned",
-      notes: "Focus on production/helper roles.",
-    },
-  ],
-  attendanceLogs: [
-    {
-      id: "a1",
-      member: "Sagar Sonawane",
-      date: getTodayDate(),
-      checkIn: "09:50",
-      checkOut: "",
-      status: "On time",
-      lateMinutes: 0,
-      method: "Manual",
-      verification: "Verified",
-      locationText: "Office entry verified",
-    },
-    {
-      id: "a2",
-      member: "Vishwatej Suryawanshi",
-      date: getTodayDate(),
-      checkIn: "09:58",
-      checkOut: "",
-      status: "On time",
-      lateMinutes: 0,
-      method: "Manual",
-      verification: "Verified",
-      locationText: "Office entry verified",
-    },
-    {
-      id: "a3",
-      member: "Rohan Dangle",
-      date: getTodayDate(),
-      checkIn: "10:11",
-      checkOut: "",
-      status: "Late",
-      lateMinutes: 11,
-      method: "Manual",
-      verification: "Verified",
-      locationText: "Office entry verified",
-    },
-  ],
-  leaveRequests: [
-    {
-      id: "lv1",
-      member: "Preeti",
-      fromDate: getTodayDate(),
-      toDate: getTodayDate(),
-      reason: "Personal work for half day permission.",
-      status: "Pending",
-      requestedOn: getTodayDate(),
-      decidedBy: "",
-    },
-  ],
-  gatePassRequests: [
-    {
-      id: "gp1",
-      member: "Vishwatej Suryawanshi",
-      destination: "Client visit",
-      reason: "Meeting follow-up with company HR.",
-      outTime: "03:30 PM",
-      expectedReturn: "05:30 PM",
-      status: "Pending",
-      requestedOn: getTodayDate(),
-      decidedBy: "",
-    },
-  ],
+  clients: [],
+  requirements: [],
+  candidates: [],
+  followUps: [],
+  reports: [],
+  invoices: [],
+  tasks: [],
+  attendanceLogs: [],
+  leaveRequests: [],
+  gatePassRequests: [],
 };
 
 const stages: Candidate["stage"][] = [
@@ -649,6 +413,7 @@ const loginProfiles: LoginProfile[] = [
       "Gate Pass",
       "Money",
       "Reports",
+      "Export",
     ],
   },
   {
@@ -664,12 +429,13 @@ const loginProfiles: LoginProfile[] = [
       "Leave",
       "Gate Pass",
       "Reports",
+      "Export",
     ],
   },
   {
     memberId: "m3",
     pin: "925684",
-    access: ["Launch", "Control", "Clients", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
+    access: ["Launch", "Control", "Clients", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports", "Export"],
   },
   {
     memberId: "m4",
@@ -721,6 +487,7 @@ const defaultViews = [
   "Gate Pass",
   "Money",
   "Reports",
+  "Export",
 ];
 
 const launchChecklist = [
@@ -777,10 +544,14 @@ function hasOfficeData(payload: OfficeState) {
 function isLegacyDemoData(payload: OfficeState) {
   const memberNames = payload.members.map((member) => member.name).join(" ");
   const clientNames = payload.clients.map((client) => client.company).join(" ");
+  const recordText = JSON.stringify(payload);
 
   return (
     /Aarav|Sneha|Vikram/.test(memberNames) ||
-    /Nashik Auto Components|Western Logistics Hub/.test(clientNames)
+    /Nashik Auto Components|Western Logistics Hub/.test(clientNames) ||
+    /Sample Candidate|Confirm Press Metal interview batch|Office entry verified|Personal work for half day permission|Meeting follow-up with company HR/.test(
+      recordText,
+    )
   );
 }
 
@@ -916,6 +687,28 @@ function getLateMinutes(checkIn: string) {
   }
 
   return Math.max(0, checkHour * 60 + checkMinute - (startHour * 60 + startMinute));
+}
+
+function csvEscape(value: string | number) {
+  const text = String(value ?? "");
+  return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
+}
+
+function rowsToCsv(columns: string[], rows: ExportRow[]) {
+  return [
+    columns.map(csvEscape).join(","),
+    ...rows.map((row) => columns.map((column) => csvEscape(row[column] ?? "")).join(",")),
+  ].join("\n");
+}
+
+function downloadTextFile(fileName: string, content: string, type: string) {
+  const blob = new Blob([content], { type });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement("a");
+  link.href = url;
+  link.download = fileName;
+  link.click();
+  URL.revokeObjectURL(url);
 }
 
 export default function RecruitmentOS() {
@@ -1081,6 +874,18 @@ export default function RecruitmentOS() {
     return String(form.get(field) || activeMember?.name || "Team");
   }
 
+  function exportCsv(fileName: string, columns: string[], rows: ExportRow[]) {
+    downloadTextFile(fileName, rowsToCsv(columns, rows), "text/csv;charset=utf-8");
+  }
+
+  function exportFullBackup() {
+    downloadTextFile(
+      `ltsv-full-backup-${getTodayDate()}.json`,
+      JSON.stringify(state, null, 2),
+      "application/json;charset=utf-8",
+    );
+  }
+
   useEffect(() => {
     if (!visibleViews.includes(activeView)) {
       setActiveView(visibleViews[0] ?? "Control");
@@ -1146,6 +951,154 @@ export default function RecruitmentOS() {
       pendingAttendance: pendingAttendance.length,
     };
   }, [state]);
+
+  const exportSets = useMemo(
+    () => [
+      {
+        title: "Attendance Data",
+        description: "Date-wise check-in, status, late minutes, verification, and location proof.",
+        fileName: "ltsv-attendance-data.csv",
+        columns: [
+          "date",
+          "member",
+          "checkIn",
+          "checkOut",
+          "status",
+          "lateMinutes",
+          "method",
+          "verification",
+          "locationText",
+          "mapLink",
+        ],
+        rows: state.attendanceLogs.map((log) => ({
+          date: log.date,
+          member: log.member,
+          checkIn: log.checkIn,
+          checkOut: log.checkOut,
+          status: log.status,
+          lateMinutes: log.lateMinutes,
+          method: log.method || "",
+          verification: log.verification || "",
+          locationText: log.locationText || "",
+          mapLink: log.mapLink || "",
+        })),
+      },
+      {
+        title: "Daily Reports",
+        description: "Daily completed work, blockers, and next-day focus.",
+        fileName: "ltsv-daily-reports.csv",
+        columns: ["date", "member", "completed", "stuck", "tomorrow"],
+        rows: state.reports.map((report) => ({
+          date: report.date,
+          member: report.member,
+          completed: report.completed,
+          stuck: report.stuck,
+          tomorrow: report.tomorrow,
+        })),
+      },
+      {
+        title: "Task Data",
+        description: "Task owner, due date, priority, status, notes, and assignment source.",
+        fileName: "ltsv-task-data.csv",
+        columns: ["title", "owner", "assignedBy", "due", "priority", "status", "notes"],
+        rows: state.tasks.map((task) => ({
+          title: task.title,
+          owner: task.owner,
+          assignedBy: task.assignedBy,
+          due: task.due,
+          priority: task.priority,
+          status: task.status,
+          notes: task.notes,
+        })),
+      },
+      {
+        title: "Leave Data",
+        description: "Leave request dates, reasons, status, and boss decision history.",
+        fileName: "ltsv-leave-data.csv",
+        columns: ["requestedOn", "member", "fromDate", "toDate", "reason", "status", "decidedBy"],
+        rows: state.leaveRequests.map((leave) => ({
+          requestedOn: leave.requestedOn,
+          member: leave.member,
+          fromDate: leave.fromDate,
+          toDate: leave.toDate,
+          reason: leave.reason,
+          status: leave.status,
+          decidedBy: leave.decidedBy,
+        })),
+      },
+      {
+        title: "Gate Pass Data",
+        description: "Office movement records with reason, timing, status, and approval.",
+        fileName: "ltsv-gate-pass-data.csv",
+        columns: [
+          "requestedOn",
+          "member",
+          "destination",
+          "reason",
+          "outTime",
+          "expectedReturn",
+          "status",
+          "decidedBy",
+        ],
+        rows: state.gatePassRequests.map((pass) => ({
+          requestedOn: pass.requestedOn,
+          member: pass.member,
+          destination: pass.destination,
+          reason: pass.reason,
+          outTime: pass.outTime,
+          expectedReturn: pass.expectedReturn,
+          status: pass.status,
+          decidedBy: pass.decidedBy,
+        })),
+      },
+      {
+        title: "Candidate Data",
+        description: "Candidate pipeline records with stage, company, owner, and contact details.",
+        fileName: "ltsv-candidate-data.csv",
+        columns: ["name", "role", "phone", "city", "stage", "owner", "company"],
+        rows: state.candidates.map((candidate) => ({
+          name: candidate.name,
+          role: candidate.role,
+          phone: candidate.phone,
+          city: candidate.city,
+          stage: candidate.stage,
+          owner: candidate.owner,
+          company: candidate.company,
+        })),
+      },
+      {
+        title: "Client Data",
+        description: "Client account pipeline, industry, city, owner, model, and next follow-up.",
+        fileName: "ltsv-client-data.csv",
+        columns: ["company", "contact", "city", "industry", "status", "model", "owner", "nextFollowUp"],
+        rows: state.clients.map((client) => ({
+          company: client.company,
+          contact: client.contact,
+          city: client.city,
+          industry: client.industry,
+          status: client.status,
+          model: client.model,
+          owner: client.owner,
+          nextFollowUp: client.nextFollowUp,
+        })),
+      },
+      {
+        title: "Invoice Data",
+        description: "Invoice and payment follow-up records.",
+        fileName: "ltsv-invoice-data.csv",
+        columns: ["company", "candidate", "amount", "owner", "status", "due"],
+        rows: state.invoices.map((invoice) => ({
+          company: invoice.company,
+          candidate: invoice.candidate,
+          amount: invoice.amount,
+          owner: invoice.owner,
+          status: invoice.status,
+          due: invoice.due,
+        })),
+      },
+    ],
+    [state],
+  );
 
   const rankedMembers = useMemo(
     () =>
@@ -2860,6 +2813,52 @@ export default function RecruitmentOS() {
                   </article>
                 ))}
               </div>
+            </div>
+          </section>
+        )}
+
+        {activeView === "Export" && (
+          <section className="board-grid">
+            <div className="panel wide">
+              <PanelHeader title="Export Data" label="Saved office records" />
+              <div className="export-intro">
+                <strong>Use this when Sagar sir asks for old records.</strong>
+                <span>
+                  Download CSV files for Excel, or download one full backup file for complete
+                  system data.
+                </span>
+              </div>
+              <div className="export-grid">
+                {exportSets.map((set) => (
+                  <article className="export-card" key={set.fileName}>
+                    <div>
+                      <strong>{set.title}</strong>
+                      <span>{set.description}</span>
+                      <small>{set.rows.length} saved records</small>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => exportCsv(set.fileName, set.columns, set.rows)}
+                    >
+                      Download CSV
+                    </button>
+                  </article>
+                ))}
+              </div>
+            </div>
+
+            <div className="panel">
+              <PanelHeader title="Full Backup" label="Complete system copy" />
+              <div className="access-note">
+                <strong>For monthly safety</strong>
+                <span>
+                  This downloads one full file containing staff, clients, candidates,
+                  attendance, reports, leave, gate pass, tasks, and money records.
+                </span>
+              </div>
+              <button type="button" onClick={exportFullBackup}>
+                Download Full Backup
+              </button>
             </div>
           </section>
         )}
