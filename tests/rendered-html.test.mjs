@@ -53,6 +53,11 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /Export Data/);
   assert.match(app, /Download CSV/);
   assert.match(app, /Download Full Backup/);
+  assert.match(app, /Salary Slip/);
+  assert.match(app, /Download Salary Slip/);
+  assert.match(app, /Sonali payroll control/);
+  assert.match(app, /LTSV PVT LTD/);
+  assert.match(app, /Priti Sheshrao Dawande/);
   assert.match(app, /const officeStartTime = "09:45"/);
   assert.match(app, /09:45 AM/);
   assert.match(app, /Agreement Sent/);
@@ -73,6 +78,7 @@ test("contains the recruitment office operating system", async () => {
   assert.match(css, /\.alert-panel/);
   assert.match(css, /\.decision-actions/);
   assert.match(css, /\.export-grid/);
+  assert.match(css, /\.salary-slip-preview/);
   assert.doesNotMatch(app + layout + css, /Your site is taking shape|Codex is working|codex-preview/);
 });
 

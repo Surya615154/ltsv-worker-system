@@ -13,6 +13,7 @@ const initialPayload = {
   attendanceLogs: [],
   leaveRequests: [],
   gatePassRequests: [],
+  salaryAdjustments: [],
 };
 
 function jsonResponse(payload, init = {}) {

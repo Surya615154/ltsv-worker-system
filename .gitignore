@@ -46,3 +46,4 @@ next-env.d.ts
 
 # temporary generated QR print files
 /ltsv-office-attendance-*.png
+/ltsv-attendance-qr-poster-*

@@ -159,6 +159,18 @@ type GatePassRequest = {
   decidedBy: string;
 };
 
+type SalarySlipAdjustment = {
+  id: string;
+  memberId: string;
+  month: string;
+  advanceAmount: number;
+  incentive: number;
+  specialAllowance: number;
+  otherAllowance: number;
+  manualLopDays: number;
+  notes: string;
+};
+
 type OfficeState = {
   members: Member[];
   clients: Client[];
@@ -171,6 +183,7 @@ type OfficeState = {
   attendanceLogs: AttendanceLog[];
   leaveRequests: LeaveRequest[];
   gatePassRequests: GatePassRequest[];
+  salaryAdjustments: SalarySlipAdjustment[];
 };
 
 type LoginProfile = {
@@ -180,6 +193,141 @@ type LoginProfile = {
 };
 
 type ExportRow = Record<string, string | number>;
+
+type SalaryProfile = {
+  memberId: string;
+  salaryName: string;
+  designation: string;
+  department: string;
+  location: string;
+  dob: string;
+  doj: string;
+  aadhaarMasked: string;
+  basicSalary: number;
+  hra: number;
+};
+
+const companyPayrollInfo = {
+  name: "LTSV PVT LTD",
+  address: "3rd Floor, Classic Arcade, Upendra Nagar, Bus Stop, Cidco Nashik-422010",
+  phone: "+91 95614 18247",
+  email: "innashik.in@gmail.com",
+  footer: "LTSV Pvt. Ltd. | Nashik, Maharashtra | +91 95614 18247 | innashik.in@gmail.com",
+  authorizedSignatory: "SAGAR SONAWANE",
+};
+
+const officialLaunchDate = "2026-08-01";
+
+const salaryProfiles: SalaryProfile[] = [
+  {
+    memberId: "m2",
+    salaryName: "Sonali Omkar Shingre",
+    designation: "HR Manager",
+    department: "HR DEPARTMENT",
+    location: "NASHIK",
+    dob: "28/07/1986",
+    doj: "01/06/2019",
+    aadhaarMasked: "XXXX XXXX 6009",
+    basicSalary: 18000,
+    hra: 0,
+  },
+  {
+    memberId: "m3",
+    salaryName: "VISHWATEJ VISHAL SURYAWANSHI",
+    designation: "BDO",
+    department: "Business Development",
+    location: "NASHIK",
+    dob: "21/03/2006",
+    doj: "26/06/2026",
+    aadhaarMasked: "XXXX XXXX 7613",
+    basicSalary: 8000,
+    hra: 0,
+  },
+  {
+    memberId: "m4",
+    salaryName: "ROHAN SUNIL DANGLE",
+    designation: "HR Recruiter",
+    department: "HR",
+    location: "CIDCO",
+    dob: "30/06/1999",
+    doj: "01/07/2026",
+    aadhaarMasked: "XXXX XXXX 8853",
+    basicSalary: 15000,
+    hra: 0,
+  },
+  {
+    memberId: "m5",
+    salaryName: "Laxmi Namdev Manmothe",
+    designation: "Coordinator",
+    department: "HR",
+    location: "CIDCO",
+    dob: "13/06/2006",
+    doj: "28/07/2025",
+    aadhaarMasked: "XXXX XXXX 6560",
+    basicSalary: 6000,
+    hra: 0,
+  },
+  {
+    memberId: "m6",
+    salaryName: "Priti Sheshrao Dawande",
+    designation: "Coordinator",
+    department: "HR",
+    location: "Nashik",
+    dob: "23/09/2002",
+    doj: "05/12/2022",
+    aadhaarMasked: "To be updated",
+    basicSalary: 6000,
+    hra: 0,
+  },
+  {
+    memberId: "m7",
+    salaryName: "SATISH SHESHRAO KHILLARE",
+    designation: "BDM",
+    department: "DSA",
+    location: "NASHIK",
+    dob: "20/07/2004",
+    doj: "17/04/2023",
+    aadhaarMasked: "XXXX XXXX 5563",
+    basicSalary: 13000,
+    hra: 0,
+  },
+  {
+    memberId: "m8",
+    salaryName: "VAISHNAVI NANDRAM BORHADE",
+    designation: "BRE",
+    department: "DSA",
+    location: "NASHIK",
+    dob: "03/06/2005",
+    doj: "14/07/2026",
+    aadhaarMasked: "XXXX XXXX 8026",
+    basicSalary: 6000,
+    hra: 0,
+  },
+  {
+    memberId: "m9",
+    salaryName: "PAWAR GAYATRI KAILAS",
+    designation: "CRE",
+    department: "DSA",
+    location: "NASHIK",
+    dob: "21/07/1999",
+    doj: "15/07/2026",
+    aadhaarMasked: "XXXX XXXX 0960",
+    basicSalary: 9000,
+    hra: 0,
+  },
+  {
+    memberId: "m10",
+    salaryName: "Nandini Subhash Ghegadmal",
+    designation: "Team Leader",
+    department: "DSA",
+    location: "Nashik",
+    dob: "08/04/2010",
+    doj: "23/05/2025",
+    aadhaarMasked: "To be updated",
+    basicSalary: 6000,
+    hra: 0,
+  },
+];
 
 const seedState: OfficeState = {
   members: [
@@ -260,7 +408,7 @@ const seedState: OfficeState = {
     },
     {
       id: "m6",
-      name: "Preeti",
+      name: "Priti",
       email: "hr.pritidawandeltsv@gmail.com",
       role: "Coordinator",
       desk: "Candidate application calling",
@@ -344,6 +492,7 @@ const seedState: OfficeState = {
   attendanceLogs: [],
   leaveRequests: [],
   gatePassRequests: [],
+  salaryAdjustments: [],
 };
 
 const stages: Candidate["stage"][] = [
@@ -414,6 +563,7 @@ const loginProfiles: LoginProfile[] = [
       "Money",
       "Reports",
       "Export",
+      "Salary Slip",
     ],
   },
   {
@@ -430,6 +580,7 @@ const loginProfiles: LoginProfile[] = [
       "Gate Pass",
       "Reports",
       "Export",
+      "Salary Slip",
     ],
   },
   {
@@ -488,6 +639,7 @@ const defaultViews = [
   "Money",
   "Reports",
   "Export",
+  "Salary Slip",
 ];
 
 const launchChecklist = [
@@ -556,7 +708,7 @@ function isLegacyDemoData(payload: OfficeState) {
 }
 
 function normalizeStaffName(name: string) {
-  return name.replace(/Rohan Dongre/g, "Rohan Dangle");
+  return name.replace(/Rohan Dongre/g, "Rohan Dangle").replace(/Preeti/g, "Priti");
 }
 
 function getSeedMemberEmail(member: Member) {
@@ -587,6 +739,10 @@ function mergeSeedMembers(members: Member[]) {
   return [...loadedMembers, ...missingMembers];
 }
 
+function isOnOrAfterLaunchDate(date: string) {
+  return !date || date >= officialLaunchDate;
+}
+
 function normalizeOfficeState(payload: OfficeState): OfficeState {
   const clients = payload.clients?.length ? payload.clients : seedState.clients;
 
@@ -615,7 +771,7 @@ function normalizeOfficeState(payload: OfficeState): OfficeState {
         }))
       : seedState.followUps,
     reports: payload.reports?.length
-      ? payload.reports.map((report) => ({
+      ? payload.reports.filter((report) => isOnOrAfterLaunchDate(report.date)).map((report) => ({
           ...report,
           member: normalizeStaffName(report.member),
         }))
@@ -634,25 +790,26 @@ function normalizeOfficeState(payload: OfficeState): OfficeState {
         }))
       : seedState.tasks,
     attendanceLogs: payload.attendanceLogs?.length
-      ? payload.attendanceLogs.map((log) => ({
+      ? payload.attendanceLogs.filter((log) => isOnOrAfterLaunchDate(log.date)).map((log) => ({
           ...log,
           member: normalizeStaffName(log.member),
         }))
       : seedState.attendanceLogs,
     leaveRequests: payload.leaveRequests?.length
-      ? payload.leaveRequests.map((leave) => ({
+      ? payload.leaveRequests.filter((leave) => isOnOrAfterLaunchDate(leave.requestedOn)).map((leave) => ({
           ...leave,
           member: normalizeStaffName(leave.member),
           decidedBy: normalizeStaffName(leave.decidedBy),
         }))
       : seedState.leaveRequests,
     gatePassRequests: payload.gatePassRequests?.length
-      ? payload.gatePassRequests.map((pass) => ({
+      ? payload.gatePassRequests.filter((pass) => isOnOrAfterLaunchDate(pass.requestedOn)).map((pass) => ({
           ...pass,
           member: normalizeStaffName(pass.member),
           decidedBy: normalizeStaffName(pass.decidedBy),
         }))
       : seedState.gatePassRequests,
+    salaryAdjustments: payload.salaryAdjustments?.length ? payload.salaryAdjustments : seedState.salaryAdjustments,
   };
 }
 
@@ -689,6 +846,113 @@ function getLateMinutes(checkIn: string) {
   return Math.max(0, checkHour * 60 + checkMinute - (startHour * 60 + startMinute));
 }
 
+function getMonthKey(date = new Date()) {
+  return `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}`;
+}
+
+function getDaysInMonth(month: string) {
+  const [year, monthNumber] = month.split("-").map(Number);
+  return new Date(year, monthNumber, 0).getDate();
+}
+
+function getMonthLabel(month: string) {
+  const [year, monthNumber] = month.split("-").map(Number);
+  return new Date(year, monthNumber - 1, 1).toLocaleDateString("en-IN", {
+    month: "long",
+    year: "numeric",
+  });
+}
+
+function isDateInMonth(date: string, month: string) {
+  return date.startsWith(month);
+}
+
+function countLeaveDays(fromDate: string, toDate: string, month: string) {
+  const [year, monthNumber] = month.split("-").map(Number);
+  const monthStart = new Date(year, monthNumber - 1, 1);
+  const monthEnd = new Date(year, monthNumber, 0);
+  const from = new Date(fromDate);
+  const to = new Date(toDate || fromDate);
+  const start = from > monthStart ? from : monthStart;
+  const end = to < monthEnd ? to : monthEnd;
+
+  if (Number.isNaN(start.getTime()) || Number.isNaN(end.getTime()) || start > end) {
+    return 0;
+  }
+
+  return Math.floor((end.getTime() - start.getTime()) / 86400000) + 1;
+}
+
+function getLatePenaltyDays(lateCount: number) {
+  if (lateCount >= 5) return 1;
+  if (lateCount >= 3) return 0.5;
+  return 0;
+}
+
+function formatMoney(amount: number) {
+  return Math.round(amount).toLocaleString("en-IN");
+}
+
+function numberToWords(value: number) {
+  const ones = [
+    "",
+    "One",
+    "Two",
+    "Three",
+    "Four",
+    "Five",
+    "Six",
+    "Seven",
+    "Eight",
+    "Nine",
+    "Ten",
+    "Eleven",
+    "Twelve",
+    "Thirteen",
+    "Fourteen",
+    "Fifteen",
+    "Sixteen",
+    "Seventeen",
+    "Eighteen",
+    "Nineteen",
+  ];
+  const tens = ["", "", "Twenty", "Thirty", "Forty", "Fifty", "Sixty", "Seventy", "Eighty", "Ninety"];
+
+  function belowThousand(number: number) {
+    let text = "";
+    if (number >= 100) {
+      text += `${ones[Math.floor(number / 100)]} Hundred `;
+      number %= 100;
+    }
+    if (number >= 20) {
+      text += `${tens[Math.floor(number / 10)]} `;
+      number %= 10;
+    }
+    if (number > 0) {
+      text += `${ones[number]} `;
+    }
+    return text.trim();
+  }
+
+  let number = Math.round(value);
+  if (number === 0) return "Zero Rupees only";
+
+  const parts: string[] = [];
+  const crore = Math.floor(number / 10000000);
+  number %= 10000000;
+  const lakh = Math.floor(number / 100000);
+  number %= 100000;
+  const thousand = Math.floor(number / 1000);
+  number %= 1000;
+
+  if (crore) parts.push(`${belowThousand(crore)} Crore`);
+  if (lakh) parts.push(`${belowThousand(lakh)} Lakh`);
+  if (thousand) parts.push(`${belowThousand(thousand)} Thousand`);
+  if (number) parts.push(belowThousand(number));
+
+  return `${parts.join(" ")} Rupees only`;
+}
+
 function csvEscape(value: string | number) {
   const text = String(value ?? "");
   return /[",\n]/.test(text) ? `"${text.replace(/"/g, '""')}"` : text;
@@ -711,6 +975,14 @@ function downloadTextFile(fileName: string, content: string, type: string) {
   URL.revokeObjectURL(url);
 }
 
+function htmlEscape(value: string | number) {
+  return String(value ?? "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 export default function RecruitmentOS() {
   const [state, setState] = useState<OfficeState>(seedState);
   const [activeView, setActiveView] = useState("Control");
@@ -729,6 +1001,9 @@ export default function RecruitmentOS() {
   const [qrMapLink, setQrMapLink] = useState("");
   const [qrLocationStatus, setQrLocationStatus] = useState("Tap location before marking attendance.");
   const [qrMessage, setQrMessage] = useState("");
+  const [currentDateTime, setCurrentDateTime] = useState("");
+  const [salaryMonth, setSalaryMonth] = useState(getMonthKey());
+  const [salaryMemberId, setSalaryMemberId] = useState("m4");
   const attendanceQrLink = useMemo(() => {
     const origin =
       typeof window === "undefined"
@@ -804,6 +1079,21 @@ export default function RecruitmentOS() {
   }, [isQrAttendanceMode]);
 
   useEffect(() => {
+    function tick() {
+      setCurrentDateTime(
+        new Date().toLocaleString("en-IN", {
+          dateStyle: "medium",
+          timeStyle: "short",
+        }),
+      );
+    }
+
+    tick();
+    const timer = window.setInterval(tick, 30000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
     const handle = window.setTimeout(async () => {
       try {
         setSaveStatus("Saving");
@@ -843,6 +1133,8 @@ export default function RecruitmentOS() {
   const isBoss = loggedInMemberId === "m1";
   const isSonali = loggedInMemberId === "m2";
   const isAdmin = loggedInMemberId === "m1" || loggedInMemberId === "m2";
+  const canViewSalarySlip = isBoss || isSonali;
+  const canEditSalarySlip = isSonali;
   const visibleViews = loggedInProfile?.access ?? defaultViews;
   const assignableMembers = isAdmin
     ? state.members
@@ -884,6 +1176,149 @@ export default function RecruitmentOS() {
       JSON.stringify(state, null, 2),
       "application/json;charset=utf-8",
     );
+  }
+
+  function updateSalaryAdjustment(
+    field: keyof Pick<
+      SalarySlipAdjustment,
+      "advanceAmount" | "incentive" | "specialAllowance" | "otherAllowance" | "manualLopDays" | "notes"
+    >,
+    value: string,
+  ) {
+    if (!canEditSalarySlip) return;
+
+    setState((current) => {
+      const existing = current.salaryAdjustments.find(
+        (adjustment) =>
+          adjustment.memberId === salaryProfile.memberId &&
+          adjustment.month === salaryMonth,
+      );
+      const nextAdjustment: SalarySlipAdjustment = {
+        id: existing?.id || makeId("salary"),
+        memberId: salaryProfile.memberId,
+        month: salaryMonth,
+        advanceAmount: existing?.advanceAmount || 0,
+        incentive: existing?.incentive || 0,
+        specialAllowance: existing?.specialAllowance || 0,
+        otherAllowance: existing?.otherAllowance || 0,
+        manualLopDays: existing?.manualLopDays || 0,
+        notes: existing?.notes || "",
+        [field]: field === "notes" ? value : Number(value || 0),
+      };
+
+      return {
+        ...current,
+        salaryAdjustments: existing
+          ? current.salaryAdjustments.map((adjustment) =>
+              adjustment.id === existing.id ? nextAdjustment : adjustment,
+            )
+          : [nextAdjustment, ...current.salaryAdjustments],
+      };
+    });
+  }
+
+  function buildSalarySlipHtml() {
+    const logoUrl =
+      typeof window === "undefined"
+        ? "/ltsv-logo.png"
+        : `${window.location.origin}/ltsv-logo.png`;
+
+    return `<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <title>${htmlEscape(companyPayrollInfo.name)} Salary Slip - ${htmlEscape(salarySlip.monthLabel)}</title>
+  <style>
+    body { color: #1f2933; font-family: Arial, sans-serif; margin: 0; }
+    .slip { padding: 34px 44px; }
+    .top-line { background: #0c2a56; height: 18px; border-bottom: 5px solid #c99a37; }
+    .header { display: grid; grid-template-columns: 1fr 110px; gap: 24px; align-items: center; text-align: center; }
+    .header h1 { color: #0c2a56; font-size: 30px; margin: 12px 0 10px; }
+    .header p { color: #5f6b7a; font-weight: 700; line-height: 1.5; margin: 0; }
+    .logo { height: 96px; object-fit: contain; width: 96px; }
+    .title { background: #0c2a56; border-radius: 4px; color: #fff; margin: 24px 0 42px; padding: 10px; text-align: center; }
+    .title h2 { margin: 0; }
+    table { border-collapse: collapse; margin-bottom: 18px; width: 100%; }
+    th, td { border: 1px solid #aeb8c7; font-size: 13px; padding: 10px; text-align: left; }
+    th { background: #e8edf4; }
+    .label { color: #2b1162; font-weight: 800; width: 22%; }
+    .amount { text-align: right; }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+    .summary td { font-weight: 800; }
+    .sign { display: grid; grid-template-columns: 1fr 1fr; gap: 28px; margin-top: 44px; }
+    .line { border-top: 2px solid #1f2933; padding-top: 10px; }
+    .right { text-align: right; }
+    .footer { border-top: 1px solid #cbd5e1; color: #5f6b7a; display: flex; justify-content: space-between; margin-top: 26px; padding-top: 14px; }
+    .print { margin: 18px 44px; }
+    @media print { .print { display: none; } }
+  </style>
+</head>
+<body>
+  <div class="top-line"></div>
+  <button class="print" onclick="window.print()">Print / Save as PDF</button>
+  <main class="slip">
+    <section class="header">
+      <div>
+        <h1>${htmlEscape(companyPayrollInfo.name)}</h1>
+        <p>${htmlEscape(companyPayrollInfo.address)}<br />${htmlEscape(companyPayrollInfo.phone)} | ${htmlEscape(companyPayrollInfo.email)}</p>
+      </div>
+      <img class="logo" src="${htmlEscape(logoUrl)}" alt="LTSV logo" />
+    </section>
+    <section class="title">
+      <h2>PAY SLIP</h2>
+      <strong>${htmlEscape(salarySlip.monthLabel)}</strong>
+    </section>
+    <table>
+      <tr><td class="label">Name</td><td>${htmlEscape(salarySlip.profile.salaryName)}</td><td class="label">DOB</td><td>${htmlEscape(salarySlip.profile.dob)}</td></tr>
+      <tr><td class="label">Designation</td><td>${htmlEscape(salarySlip.profile.designation)}</td><td class="label">DOJ</td><td>${htmlEscape(salarySlip.profile.doj)}</td></tr>
+      <tr><td class="label">Location</td><td>${htmlEscape(salarySlip.profile.location)}</td><td class="label">Aadhaar</td><td>${htmlEscape(salarySlip.profile.aadhaarMasked)}</td></tr>
+      <tr><td class="label">LOP</td><td>${salarySlip.lopDays}</td><td class="label">Department</td><td>${htmlEscape(salarySlip.profile.department)}</td></tr>
+      <tr><td class="label">Payable Days</td><td>${Math.max(0, salarySlip.daysInMonth - salarySlip.lopDays - salarySlip.latePenaltyDays)}</td><td class="label">Days In Month</td><td>${salarySlip.daysInMonth}</td></tr>
+      <tr><td class="label">Late Marks</td><td>${salarySlip.lateCount}</td><td class="label">Late Deduction Days</td><td>${salarySlip.latePenaltyDays}</td></tr>
+    </table>
+    <section class="grid">
+      <table>
+        <tr><th>Earnings</th><th class="amount">Rs.</th></tr>
+        <tr><td>Basic</td><td class="amount">${formatMoney(salarySlip.basic)}</td></tr>
+        <tr><td>House Rent Allowance</td><td class="amount">${formatMoney(salarySlip.hra)}</td></tr>
+        <tr><td>Special Allowance</td><td class="amount">${formatMoney(salarySlip.specialAllowance)}</td></tr>
+        <tr><td>Incentive</td><td class="amount">${formatMoney(salarySlip.incentive)}</td></tr>
+        <tr><td>Other Allowance</td><td class="amount">${formatMoney(salarySlip.otherAllowance)}</td></tr>
+        <tr><th>Total Earnings</th><th class="amount">${formatMoney(salarySlip.totalEarnings)}</th></tr>
+      </table>
+      <table>
+        <tr><th>Deductions</th><th class="amount">Rs.</th></tr>
+        <tr><td>Employee LWF / Leaves</td><td class="amount">${formatMoney(salarySlip.leaveDeduction + salarySlip.lateDeduction)}</td></tr>
+        <tr><td>Employee PF Contribution</td><td class="amount">0</td></tr>
+        <tr><td>Advance amount</td><td class="amount">${formatMoney(salarySlip.advanceAmount)}</td></tr>
+        <tr><td>PT</td><td class="amount">0</td></tr>
+        <tr><td>ESIC</td><td class="amount">0</td></tr>
+        <tr><th>Total Deduction</th><th class="amount">${formatMoney(salarySlip.totalDeduction)}</th></tr>
+      </table>
+    </section>
+    <table class="summary">
+      <tr><td class="label">Advance Deduction</td><td class="amount">${formatMoney(salarySlip.advanceAmount)}</td><td class="label">In Hand</td><td class="amount">${formatMoney(salarySlip.inHand)}</td></tr>
+      <tr><td class="label">In Words</td><td colspan="3">${htmlEscape(salarySlip.inWords)}</td></tr>
+    </table>
+    <section class="sign">
+      <div><div class="line">${htmlEscape(salarySlip.profile.salaryName)}</div><strong>Signature</strong></div>
+      <div class="right"><div class="line">${htmlEscape(companyPayrollInfo.authorizedSignatory)}</div><strong>Authorized Signatory</strong></div>
+    </section>
+    <section class="footer">
+      <span>${htmlEscape(companyPayrollInfo.footer)}</span>
+      <span>Generated ${htmlEscape(currentDateTime || new Date().toLocaleString("en-IN"))}</span>
+    </section>
+  </main>
+</body>
+</html>`;
+  }
+
+  function downloadSalarySlip() {
+    const fileName = `salary-slip-${salarySlip.profile.salaryName
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")}-${salarySlip.month}.html`;
+
+    downloadTextFile(fileName, buildSalarySlipHtml(), "text/html;charset=utf-8");
   }
 
   useEffect(() => {
@@ -1096,9 +1531,148 @@ export default function RecruitmentOS() {
           due: invoice.due,
         })),
       },
+      {
+        title: "Salary Adjustments",
+        description: "Monthly payroll advance, incentive, allowance, and manual LOP entries.",
+        fileName: "ltsv-salary-adjustments.csv",
+        columns: [
+          "month",
+          "employee",
+          "advanceAmount",
+          "incentive",
+          "specialAllowance",
+          "otherAllowance",
+          "manualLopDays",
+          "notes",
+        ],
+        rows: state.salaryAdjustments.map((adjustment) => {
+          const profile = salaryProfiles.find(
+            (item) => item.memberId === adjustment.memberId,
+          );
+
+          return {
+            month: adjustment.month,
+            employee: profile?.salaryName || adjustment.memberId,
+            advanceAmount: adjustment.advanceAmount,
+            incentive: adjustment.incentive,
+            specialAllowance: adjustment.specialAllowance,
+            otherAllowance: adjustment.otherAllowance,
+            manualLopDays: adjustment.manualLopDays,
+            notes: adjustment.notes,
+          };
+        }),
+      },
     ],
     [state],
   );
+
+  const salaryProfile = useMemo(
+    () => salaryProfiles.find((profile) => profile.memberId === salaryMemberId) ?? salaryProfiles[0],
+    [salaryMemberId],
+  );
+  const salaryMember = useMemo(
+    () => state.members.find((member) => member.id === salaryProfile.memberId),
+    [salaryProfile.memberId, state.members],
+  );
+  const salaryAdjustment = useMemo(
+    () =>
+      state.salaryAdjustments.find(
+        (adjustment) =>
+          adjustment.memberId === salaryProfile.memberId &&
+          adjustment.month === salaryMonth,
+      ) ?? {
+        id: "",
+        memberId: salaryProfile.memberId,
+        month: salaryMonth,
+        advanceAmount: 0,
+        incentive: 0,
+        specialAllowance: 0,
+        otherAllowance: 0,
+        manualLopDays: 0,
+        notes: "",
+      },
+    [salaryMonth, salaryProfile.memberId, state.salaryAdjustments],
+  );
+  const salarySlip = useMemo(() => {
+    const employeeName = salaryMember?.name ?? salaryProfile.salaryName;
+    const monthLogs = state.attendanceLogs.filter(
+      (log) =>
+        log.member === employeeName &&
+        isDateInMonth(log.date, salaryMonth) &&
+        log.verification !== "Rejected",
+    );
+    const presentDays = monthLogs.reduce((sum, log) => {
+      if (log.status === "Half day") return sum + 0.5;
+      if (log.status === "On time" || log.status === "Late") return sum + 1;
+      return sum;
+    }, 0);
+    const absentDays = monthLogs.filter((log) => log.status === "Absent").length;
+    const lateCount = monthLogs.filter((log) => log.status === "Late").length;
+    const approvedLeaveDays = state.leaveRequests
+      .filter(
+        (leave) =>
+          leave.member === employeeName &&
+          leave.status === "Granted" &&
+          (isDateInMonth(leave.fromDate, salaryMonth) ||
+            isDateInMonth(leave.toDate, salaryMonth)),
+      )
+      .reduce(
+        (sum, leave) =>
+          sum + countLeaveDays(leave.fromDate, leave.toDate, salaryMonth),
+        0,
+      );
+    const daysInMonth = getDaysInMonth(salaryMonth);
+    const lopDays = absentDays + approvedLeaveDays + salaryAdjustment.manualLopDays;
+    const latePenaltyDays = getLatePenaltyDays(lateCount);
+    const totalEarnings =
+      salaryProfile.basicSalary +
+      salaryProfile.hra +
+      salaryAdjustment.specialAllowance +
+      salaryAdjustment.incentive +
+      salaryAdjustment.otherAllowance;
+    const perDaySalary = totalEarnings / Math.max(daysInMonth, 1);
+    const leaveDeduction = perDaySalary * lopDays;
+    const lateDeduction = perDaySalary * latePenaltyDays;
+    const totalDeduction =
+      leaveDeduction + lateDeduction + salaryAdjustment.advanceAmount;
+    const inHand = Math.max(0, totalEarnings - totalDeduction);
+
+    return {
+      profile: salaryProfile,
+      member: salaryMember,
+      month: salaryMonth,
+      monthLabel: getMonthLabel(salaryMonth),
+      daysInMonth,
+      presentDays,
+      absentDays,
+      approvedLeaveDays,
+      manualLopDays: salaryAdjustment.manualLopDays,
+      lopDays,
+      lateCount,
+      latePenaltyDays,
+      perDaySalary,
+      basic: salaryProfile.basicSalary,
+      hra: salaryProfile.hra,
+      specialAllowance: salaryAdjustment.specialAllowance,
+      incentive: salaryAdjustment.incentive,
+      otherAllowance: salaryAdjustment.otherAllowance,
+      totalEarnings,
+      leaveDeduction,
+      lateDeduction,
+      advanceAmount: salaryAdjustment.advanceAmount,
+      totalDeduction,
+      inHand,
+      inWords: numberToWords(inHand),
+      notes: salaryAdjustment.notes,
+    };
+  }, [
+    salaryAdjustment,
+    salaryMember,
+    salaryMonth,
+    salaryProfile,
+    state.attendanceLogs,
+    state.leaveRequests,
+  ]);
 
   const rankedMembers = useMemo(
     () =>
@@ -1837,6 +2411,7 @@ export default function RecruitmentOS() {
             <p className="eyebrow">All-sector recruitment operating board</p>
             <h2>{activeView}</h2>
             <span className="brand-subline">We get to opportunity</span>
+            <span className="clock-line">{currentDateTime}</span>
           </div>
           <div className="topbar-actions">
             {isBoss ? (
@@ -2812,6 +3387,176 @@ export default function RecruitmentOS() {
                     <small>Next: {report.tomorrow}</small>
                   </article>
                 ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {activeView === "Salary Slip" && canViewSalarySlip && (
+          <section className="board-grid">
+            <div className="panel wide">
+              <PanelHeader
+                title="Salary Slip"
+                label={canEditSalarySlip ? "Sonali payroll control" : "Boss payroll view"}
+              />
+              <div className="salary-controls">
+                <label className="time-field">
+                  <span>Salary month</span>
+                  <input
+                    type="month"
+                    value={salaryMonth}
+                    onChange={(event) => setSalaryMonth(event.target.value)}
+                  />
+                </label>
+                <label className="time-field">
+                  <span>Employee</span>
+                  <select
+                    value={salaryMemberId}
+                    onChange={(event) => setSalaryMemberId(event.target.value)}
+                  >
+                    {salaryProfiles.map((profile) => (
+                      <option key={profile.memberId} value={profile.memberId}>
+                        {profile.salaryName} - {profile.designation}
+                      </option>
+                    ))}
+                  </select>
+                </label>
+                <button type="button" onClick={downloadSalarySlip}>
+                  Download Salary Slip
+                </button>
+              </div>
+
+              <div className="salary-slip-preview">
+                <div className="salary-slip-head">
+                  <div>
+                    <h3>{companyPayrollInfo.name}</h3>
+                    <span>{companyPayrollInfo.address}</span>
+                    <span>
+                      {companyPayrollInfo.phone} | {companyPayrollInfo.email}
+                    </span>
+                  </div>
+                  <img alt="LTSV logo" src="/ltsv-logo.png" />
+                </div>
+                <div className="salary-slip-title">
+                  <strong>PAY SLIP</strong>
+                  <span>{salarySlip.monthLabel}</span>
+                </div>
+                <div className="salary-info-grid">
+                  <div><strong>Name</strong><span>{salarySlip.profile.salaryName}</span></div>
+                  <div><strong>DOB</strong><span>{salarySlip.profile.dob}</span></div>
+                  <div><strong>Designation</strong><span>{salarySlip.profile.designation}</span></div>
+                  <div><strong>DOJ</strong><span>{salarySlip.profile.doj}</span></div>
+                  <div><strong>Location</strong><span>{salarySlip.profile.location}</span></div>
+                  <div><strong>Aadhaar</strong><span>{salarySlip.profile.aadhaarMasked}</span></div>
+                  <div><strong>Department</strong><span>{salarySlip.profile.department}</span></div>
+                  <div><strong>Days in Month</strong><span>{salarySlip.daysInMonth}</span></div>
+                  <div><strong>Present Days</strong><span>{salarySlip.presentDays}</span></div>
+                  <div><strong>LOP Days</strong><span>{salarySlip.lopDays}</span></div>
+                  <div><strong>Late Marks</strong><span>{salarySlip.lateCount}</span></div>
+                  <div><strong>Late Deduction</strong><span>{salarySlip.latePenaltyDays} day</span></div>
+                </div>
+
+                <div className="salary-columns">
+                  <div className="salary-box">
+                    <h4>Earnings</h4>
+                    <div><span>Basic</span><strong>Rs {formatMoney(salarySlip.basic)}</strong></div>
+                    <div><span>House Rent Allowance</span><strong>Rs {formatMoney(salarySlip.hra)}</strong></div>
+                    <div><span>Special Allowance</span><strong>Rs {formatMoney(salarySlip.specialAllowance)}</strong></div>
+                    <div><span>Incentive</span><strong>Rs {formatMoney(salarySlip.incentive)}</strong></div>
+                    <div><span>Other Allowance</span><strong>Rs {formatMoney(salarySlip.otherAllowance)}</strong></div>
+                    <div className="salary-total"><span>Total Earnings</span><strong>Rs {formatMoney(salarySlip.totalEarnings)}</strong></div>
+                  </div>
+                  <div className="salary-box">
+                    <h4>Deductions</h4>
+                    <div><span>Leave + Late Deduction</span><strong>Rs {formatMoney(salarySlip.leaveDeduction + salarySlip.lateDeduction)}</strong></div>
+                    <div><span>Employee PF Contribution</span><strong>Rs 0</strong></div>
+                    <div><span>Advance Amount</span><strong>Rs {formatMoney(salarySlip.advanceAmount)}</strong></div>
+                    <div><span>PT</span><strong>Rs 0</strong></div>
+                    <div><span>ESIC</span><strong>Rs 0</strong></div>
+                    <div className="salary-total"><span>Total Deduction</span><strong>Rs {formatMoney(salarySlip.totalDeduction)}</strong></div>
+                  </div>
+                </div>
+
+                <div className="salary-net">
+                  <span>In Hand</span>
+                  <strong>Rs {formatMoney(salarySlip.inHand)}</strong>
+                  <small>{salarySlip.inWords}</small>
+                </div>
+              </div>
+            </div>
+
+            <div className="panel">
+              <PanelHeader
+                title="Monthly Adjustments"
+                label={canEditSalarySlip ? "Editable by Sonali ma'am" : "View only"}
+              />
+              <div className="form-stack">
+                <label className="time-field">
+                  <span>Advance cash</span>
+                  <input
+                    disabled={!canEditSalarySlip}
+                    min="0"
+                    onChange={(event) => updateSalaryAdjustment("advanceAmount", event.target.value)}
+                    type="number"
+                    value={salaryAdjustment.advanceAmount}
+                  />
+                </label>
+                <label className="time-field">
+                  <span>Incentive</span>
+                  <input
+                    disabled={!canEditSalarySlip}
+                    min="0"
+                    onChange={(event) => updateSalaryAdjustment("incentive", event.target.value)}
+                    type="number"
+                    value={salaryAdjustment.incentive}
+                  />
+                </label>
+                <label className="time-field">
+                  <span>Special allowance</span>
+                  <input
+                    disabled={!canEditSalarySlip}
+                    min="0"
+                    onChange={(event) => updateSalaryAdjustment("specialAllowance", event.target.value)}
+                    type="number"
+                    value={salaryAdjustment.specialAllowance}
+                  />
+                </label>
+                <label className="time-field">
+                  <span>Other allowance</span>
+                  <input
+                    disabled={!canEditSalarySlip}
+                    min="0"
+                    onChange={(event) => updateSalaryAdjustment("otherAllowance", event.target.value)}
+                    type="number"
+                    value={salaryAdjustment.otherAllowance}
+                  />
+                </label>
+                <label className="time-field">
+                  <span>Manual extra LOP days</span>
+                  <input
+                    disabled={!canEditSalarySlip}
+                    min="0"
+                    onChange={(event) => updateSalaryAdjustment("manualLopDays", event.target.value)}
+                    step="0.5"
+                    type="number"
+                    value={salaryAdjustment.manualLopDays}
+                  />
+                </label>
+                <textarea
+                  disabled={!canEditSalarySlip}
+                  onChange={(event) => updateSalaryAdjustment("notes", event.target.value)}
+                  placeholder="Payroll notes"
+                  rows={3}
+                  value={salaryAdjustment.notes}
+                />
+              </div>
+              <div className="access-note">
+                <strong>Calculation rule</strong>
+                <span>
+                  Salary is divided by days in month. Non-paid leave/absent days
+                  are LOP. 3-4 late marks deduct half day; 5 or more late marks
+                  deduct one full day.
+                </span>
               </div>
             </div>
           </section>

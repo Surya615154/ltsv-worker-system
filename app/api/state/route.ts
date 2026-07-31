@@ -8,6 +8,12 @@ const initialPayload = {
   candidates: [],
   followUps: [],
   reports: [],
+  invoices: [],
+  tasks: [],
+  attendanceLogs: [],
+  leaveRequests: [],
+  gatePassRequests: [],
+  salaryAdjustments: [],
 };
 
 async function ensureStateTable() {
