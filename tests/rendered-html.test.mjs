@@ -53,6 +53,8 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /Export Data/);
   assert.match(app, /Download CSV/);
   assert.match(app, /Download Full Backup/);
+  assert.match(app, /const officeStartTime = "09:45"/);
+  assert.match(app, /09:45 AM/);
   assert.match(app, /Agreement Sent/);
   assert.match(app, /Rohan Dangle/);
   assert.doesNotMatch(app.replace(/function normalizeStaffName[\s\S]*?\n}\n/, ""), /Rohan Dongre/);

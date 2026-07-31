@@ -3,7 +3,7 @@
 import { FormEvent, useEffect, useMemo, useState } from "react";
 
 const attendanceQrPath = "/?attendance=qr";
-const officeStartTime = "10:00";
+const officeStartTime = "09:45";
 
 type Member = {
   id: string;
@@ -504,7 +504,7 @@ const launchChecklist = [
 ];
 
 const operatingRhythm = [
-  { time: "10:00 AM", action: "Morning allocation", owner: "Sagar sir" },
+  { time: "09:45 AM", action: "Office start and attendance cutoff", owner: "All team" },
   { time: "10:15 AM", action: "Company and candidate calling", owner: "All team" },
   { time: "02:30 PM", action: "Interview, vacancy, and agreement follow-up", owner: "BDO / HR / Recruiter" },
   { time: "05:30 PM", action: "Daily report and target update", owner: "Every staff member" },
@@ -722,7 +722,7 @@ export default function RecruitmentOS() {
   const [loginError, setLoginError] = useState("");
   const [isQrAttendanceMode, setIsQrAttendanceMode] = useState(false);
   const [qrMemberId, setQrMemberId] = useState("m3");
-  const [qrScanTime, setQrScanTime] = useState("10:00");
+  const [qrScanTime, setQrScanTime] = useState("09:45");
   const [qrPin, setQrPin] = useState("");
   const [qrError, setQrError] = useState("");
   const [qrLocationText, setQrLocationText] = useState("Location not captured");
