@@ -1,6 +1,6 @@
 "use client";
 
-import { FormEvent, useEffect, useMemo, useState } from "react";
+import { FormEvent, useEffect, useMemo, useRef, useState } from "react";
 
 const attendanceQrPath = "/?attendance=qr";
 const officeStartTime = "09:45";
@@ -218,7 +218,7 @@ const companyPayrollInfo = {
 };
 
 const officialLaunchDate = "2026-08-01";
-const freshStartResetVersion = "fresh-start-2026-08-01";
+const freshStartResetVersion = "fresh-start-2026-08-01-v2";
 
 const salaryProfiles: SalaryProfile[] = [
   {
@@ -999,6 +999,8 @@ export default function RecruitmentOS() {
   const [state, setState] = useState<OfficeState>(seedState);
   const [activeView, setActiveView] = useState("Control");
   const [saveStatus, setSaveStatus] = useState("Ready");
+  const [remoteLoaded, setRemoteLoaded] = useState(false);
+  const lastSavedPayload = useRef("");
   const [activeMemberId, setActiveMemberId] = useState("m3");
   const [loginMemberId, setLoginMemberId] = useState("m3");
   const [loggedInMemberId, setLoggedInMemberId] = useState<string | null>(null);
@@ -1035,13 +1037,20 @@ export default function RecruitmentOS() {
     async function loadState() {
       try {
         const response = await fetch("/api/state", { cache: "no-store" });
-        if (!response.ok) return;
+        if (!response.ok) {
+          if (!cancelled) setRemoteLoaded(true);
+          return;
+        }
         const payload = (await response.json()) as OfficeState;
         if (!cancelled && hasOfficeData(payload) && !isLegacyDemoData(payload)) {
-          setState(normalizeOfficeState(payload));
+          const nextState = normalizeOfficeState(payload);
+          lastSavedPayload.current = JSON.stringify(nextState);
+          setState(nextState);
         }
+        if (!cancelled) setRemoteLoaded(true);
       } catch {
         setSaveStatus("Offline sample mode");
+        if (!cancelled) setRemoteLoaded(true);
       }
     }
     loadState();
@@ -1106,22 +1115,33 @@ export default function RecruitmentOS() {
   }, []);
 
   useEffect(() => {
+    if (!remoteLoaded) return;
+
     const handle = window.setTimeout(async () => {
       try {
+        const payload = JSON.stringify(state);
+        if (payload === lastSavedPayload.current) return;
+
         setSaveStatus("Saving");
         const response = await fetch("/api/state", {
           method: "POST",
           headers: { "content-type": "application/json" },
-          body: JSON.stringify(state),
+          body: payload,
+          keepalive: true,
         });
-        setSaveStatus(response.ok ? "Saved" : "Not saved");
+        if (response.ok) {
+          lastSavedPayload.current = payload;
+          setSaveStatus("Saved online");
+        } else {
+          setSaveStatus("Not saved");
+        }
       } catch {
         setSaveStatus("Offline sample mode");
       }
-    }, 500);
+    }, 100);
 
     return () => window.clearTimeout(handle);
-  }, [state]);
+  }, [remoteLoaded, state]);
 
   const activeMember = useMemo(
     () =>
@@ -1171,6 +1191,28 @@ export default function RecruitmentOS() {
   const attendanceAlerts = state.attendanceLogs.filter(
     (log) => log.method === "QR Scan" && log.verification === "Pending",
   );
+
+  async function refreshOfficeData() {
+    try {
+      setSaveStatus("Refreshing");
+      const response = await fetch("/api/state", { cache: "no-store" });
+      if (!response.ok) {
+        setSaveStatus("Refresh failed");
+        return;
+      }
+
+      const payload = (await response.json()) as OfficeState;
+      const nextState =
+        hasOfficeData(payload) && !isLegacyDemoData(payload)
+          ? normalizeOfficeState(payload)
+          : seedState;
+      lastSavedPayload.current = JSON.stringify(nextState);
+      setState(nextState);
+      setSaveStatus("Synced online");
+    } catch {
+      setSaveStatus("Refresh failed");
+    }
+  }
 
   function ownedName(form: FormData, field = "owner") {
     if (!isAdmin) return loggedInMember?.name || activeMember?.name || "Team";
@@ -2426,6 +2468,9 @@ export default function RecruitmentOS() {
             <span className="clock-line">{currentDateTime}</span>
           </div>
           <div className="topbar-actions">
+            <button className="ghost-button" type="button" onClick={refreshOfficeData}>
+              Refresh Data
+            </button>
             {isBoss ? (
               <select
                 aria-label="Boss reviewing staff member"

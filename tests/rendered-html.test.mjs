@@ -58,6 +58,9 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /Sonali payroll control/);
   assert.match(app, /LTSV PVT LTD/);
   assert.match(app, /Priti Sheshrao Dawande/);
+  assert.match(app, /Refresh Data/);
+  assert.match(app, /Saved online/);
+  assert.match(app, /keepalive: true/);
   assert.match(app, /const officeStartTime = "09:45"/);
   assert.match(app, /09:45 AM/);
   assert.match(app, /Agreement Sent/);
@@ -83,8 +86,9 @@ test("contains the recruitment office operating system", async () => {
 });
 
 test("includes shared storage and removes starter dependency", async () => {
-  const [route, hosting, schema, packageJson] = await Promise.all([
+  const [route, netlifyState, hosting, schema, packageJson] = await Promise.all([
     readFile(new URL("../app/api/state/route.ts", import.meta.url), "utf8"),
+    readFile(new URL("../netlify/functions/state.mjs", import.meta.url), "utf8"),
     readFile(new URL("../.openai/hosting.json", import.meta.url), "utf8"),
     readFile(new URL("../db/schema.ts", import.meta.url), "utf8"),
     readFile(new URL("../package.json", import.meta.url), "utf8"),
@@ -94,6 +98,13 @@ test("includes shared storage and removes starter dependency", async () => {
   assert.match(route, /office_state/);
   assert.match(route, /export async function GET/);
   assert.match(route, /export async function POST/);
+  assert.match(route, /mergeOfficeState/);
+  assert.match(route, /mergeAttendance/);
+  assert.match(route, /incoming\?\.resetVersion !== initialPayload\.resetVersion/);
+  assert.match(netlifyState, /mergeOfficeState/);
+  assert.match(netlifyState, /mergeAttendance/);
+  assert.match(netlifyState, /store\.get\(stateKey/);
+  assert.match(netlifyState, /store\.setJSON\(stateKey, nextPayload/);
   assert.match(schema, /officeState/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
 
