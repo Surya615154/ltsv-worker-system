@@ -189,7 +189,6 @@ type OfficeState = {
 
 type LoginProfile = {
   memberId: string;
-  pin: string;
   access: string[];
 };
 
@@ -551,7 +550,6 @@ const taskStatuses: Task["status"][] = [
 const loginProfiles: LoginProfile[] = [
   {
     memberId: "m1",
-    pin: "731942",
     access: [
       "Launch",
       "CEO",
@@ -571,7 +569,6 @@ const loginProfiles: LoginProfile[] = [
   },
   {
     memberId: "m2",
-    pin: "468215",
     access: [
       "Launch",
       "Control",
@@ -588,42 +585,34 @@ const loginProfiles: LoginProfile[] = [
   },
   {
     memberId: "m3",
-    pin: "925684",
     access: ["Launch", "Control", "Clients", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports", "Export"],
   },
   {
     memberId: "m4",
-    pin: "384761",
     access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
   {
     memberId: "m5",
-    pin: "617493",
     access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
   {
     memberId: "m6",
-    pin: "852136",
     access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
   {
     memberId: "m7",
-    pin: "249681",
     access: ["Launch", "Control", "Clients", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
   {
     memberId: "m8",
-    pin: "739528",
     access: ["Launch", "Control", "Clients", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
   {
     memberId: "m9",
-    pin: "514872",
     access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
   {
     memberId: "m10",
-    pin: "386419",
     access: ["Launch", "Money", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
 ];
@@ -995,6 +984,26 @@ function htmlEscape(value: string | number) {
     .replace(/"/g, "&quot;");
 }
 
+function normalizeAccessCode(value: string) {
+  return value
+    .trim()
+    .toLowerCase()
+    .replace(/\s+/g, "")
+    .replace(/@(\d{2})[-/](\d{2})[-/](\d{4})$/, "@$1$2$3");
+}
+
+async function authenticateMember(memberId: string, code: string) {
+  const response = await fetch("/api/auth", {
+    method: "POST",
+    headers: { "content-type": "application/json" },
+    body: JSON.stringify({ memberId, code: normalizeAccessCode(code) }),
+  });
+
+  if (!response.ok) return false;
+  const payload = (await response.json()) as { ok?: boolean };
+  return Boolean(payload.ok);
+}
+
 export default function RecruitmentOS() {
   const [state, setState] = useState<OfficeState>(seedState);
   const [activeView, setActiveView] = useState("Control");
@@ -1165,6 +1174,7 @@ export default function RecruitmentOS() {
   const isBoss = loggedInMemberId === "m1";
   const isSonali = loggedInMemberId === "m2";
   const isAdmin = loggedInMemberId === "m1" || loggedInMemberId === "m2";
+  const canManageManualAttendance = loggedInMemberId === "m3";
   const canViewSalarySlip = isBoss || isSonali;
   const canEditSalarySlip = isSonali;
   const visibleViews = loggedInProfile?.access ?? defaultViews;
@@ -2162,8 +2172,10 @@ export default function RecruitmentOS() {
 
   function markAttendance(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canManageManualAttendance) return;
+
     const form = new FormData(event.currentTarget);
-    const memberName = ownedName(form, "member");
+    const memberName = String(form.get("member") || activeMember?.name || loggedInMember?.name || "Team");
     const status = String(form.get("status") || "On time") as AttendanceLog["status"];
     const checkIn = String(form.get("checkIn") || getCurrentClockTime());
     recordAttendance(
@@ -2174,29 +2186,28 @@ export default function RecruitmentOS() {
       Number(form.get("lateMinutes") || getLateMinutes(checkIn)),
       {
         method: "Manual",
-        verification: isAdmin ? "Verified" : "Pending",
-        locationText: isAdmin ? "Manual admin entry" : "Manual staff entry",
+        verification: "Verified",
+        locationText: "Manual entry by Vishwatej",
       },
     );
     event.currentTarget.reset();
   }
 
-  function submitQrAttendance(event: FormEvent<HTMLFormElement>) {
+  async function submitQrAttendance(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const member = state.members.find((item) => item.id === qrMemberId) ?? activeMember;
-    const profile = loginProfiles.find(
-      (item) => item.memberId === member.id && item.pin === qrPin,
-    );
+    const isAllowed = await authenticateMember(member.id, qrPin);
 
-    if (!profile) {
+    if (!isAllowed) {
       setQrError("Wrong attendance code. Select your own name and enter your code.");
       setQrMessage("");
       return;
     }
 
-    const checkIn = qrScanTime || getCurrentClockTime();
+    const checkIn = getCurrentClockTime();
     const lateMinutes = getLateMinutes(checkIn);
     const status: AttendanceLog["status"] = lateMinutes > 0 ? "Late" : "On time";
+    setQrScanTime(checkIn);
 
     recordAttendance(member.name, checkIn, "", status, lateMinutes, {
       method: "QR Scan",
@@ -2238,13 +2249,12 @@ export default function RecruitmentOS() {
     }));
   }
 
-  function login(event: FormEvent<HTMLFormElement>) {
+  async function login(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    const profile = loginProfiles.find(
-      (item) => item.memberId === loginMemberId && item.pin === loginPin,
-    );
+    const isAllowed = await authenticateMember(loginMemberId, loginPin);
+    const profile = loginProfiles.find((item) => item.memberId === loginMemberId);
 
-    if (!profile) {
+    if (!isAllowed || !profile) {
       setLoginError("Wrong code. Check your name and office code.");
       return;
     }
@@ -2308,21 +2318,14 @@ export default function RecruitmentOS() {
                 </option>
               ))}
             </select>
-            <label className="time-field">
-              <span>Check-in time</span>
-              <input
-                aria-label="QR check-in time"
-                onChange={(event) => setQrScanTime(event.target.value)}
-                type="time"
-                value={qrScanTime}
-              />
-            </label>
+            <div className="identity-lock form-lock">
+              <span>Locked scan time</span>
+              <strong>{qrScanTime}</strong>
+            </div>
             <input
               aria-label="Attendance code"
-              inputMode="numeric"
-              maxLength={6}
               onChange={(event) => setQrPin(event.target.value)}
-              placeholder="6 digit attendance code"
+              placeholder="name@birthdate attendance code"
               type="password"
               value={qrPin}
             />
@@ -2382,7 +2385,7 @@ export default function RecruitmentOS() {
           <p className="eyebrow">Life Time Success Vision</p>
           <h1>Staff Login</h1>
           <p className="login-copy">
-            Select your name and enter your 6 digit office code to open your work dashboard.
+            Select your name and enter your private name@birthdate office code.
           </p>
           <form className="form-stack" onSubmit={login}>
             <select
@@ -2397,11 +2400,9 @@ export default function RecruitmentOS() {
               ))}
             </select>
             <input
-              aria-label="PIN"
-              inputMode="numeric"
-              maxLength={6}
+              aria-label="Office access code"
               onChange={(event) => setLoginPin(event.target.value)}
-              placeholder="6 digit office code"
+              placeholder="name@birthdate office code"
               type="password"
               value={loginPin}
             />
@@ -3145,30 +3146,30 @@ export default function RecruitmentOS() {
                   </a>
                 </div>
               </div>
-              <form className="form-stack" onSubmit={markAttendance}>
-                {isAdmin ? (
+              {canManageManualAttendance ? (
+                <form className="form-stack" onSubmit={markAttendance}>
                   <select name="member" aria-label="Attendance member" defaultValue={activeMember?.name}>
-                    {assignableMembers.map((member) => (
+                    {state.members.map((member) => (
                       <option key={member.id}>{member.name}</option>
                     ))}
                   </select>
-                ) : (
-                  <div className="identity-lock form-lock">
-                    <span>Attendance for</span>
-                    <strong>{loggedInMember?.name}</strong>
-                  </div>
-                )}
-                <input name="checkIn" placeholder="Check-in time, e.g. 09:55" />
-                <input name="checkOut" placeholder="Check-out time, optional" />
-                <select name="status" aria-label="Attendance status">
-                  <option>On time</option>
-                  <option>Late</option>
-                  <option>Absent</option>
-                  <option>Half day</option>
-                </select>
-                <input name="lateMinutes" placeholder="Late minutes" type="number" min="0" />
-                <button type="submit">Mark Attendance</button>
-              </form>
+                  <input name="checkIn" placeholder="Check-in time, e.g. 09:55" />
+                  <input name="checkOut" placeholder="Check-out time, optional" />
+                  <select name="status" aria-label="Attendance status">
+                    <option>On time</option>
+                    <option>Late</option>
+                    <option>Absent</option>
+                    <option>Half day</option>
+                  </select>
+                  <input name="lateMinutes" placeholder="Late minutes" type="number" min="0" />
+                  <button type="submit">Mark Manual Attendance</button>
+                </form>
+              ) : (
+                <div className="access-note">
+                  <strong>Manual entry locked</strong>
+                  <span>Only Vishwatej can add manual attendance. Everyone else must use QR scan.</span>
+                </div>
+              )}
             </div>
           </section>
         )}
