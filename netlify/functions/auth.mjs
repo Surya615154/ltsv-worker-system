@@ -16,11 +16,27 @@ function normalizeAccessCode(value) {
     .replace(/@(\d{2})[-/](\d{2})[-/](\d{4})$/, "@$1$2$3");
 }
 
+const fallbackAccessCodes = {
+  m1: "sagar@owner",
+  m2: "sonali@hrd",
+  m3: "vishwatej@bdo",
+  m4: "rohan@30061999",
+  m5: "laxmi@13062006",
+  m6: "priti@23092002",
+  m7: "satish@20072004",
+  m8: "vaishnavi@03062005",
+  m9: "gayatri@21071999",
+  m10: "nandini@08042010",
+};
+
 function getCodeMap() {
   try {
-    return JSON.parse(process.env.LTSV_ACCESS_CODES || "{}");
+    return {
+      ...fallbackAccessCodes,
+      ...JSON.parse(process.env.LTSV_ACCESS_CODES || "{}"),
+    };
   } catch {
-    return {};
+    return fallbackAccessCodes;
   }
 }
 

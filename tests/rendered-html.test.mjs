@@ -118,12 +118,16 @@ test("includes shared storage and removes starter dependency", async () => {
   assert.match(route, /incoming\?\.resetVersion !== initialPayload\.resetVersion/);
   assert.match(authRoute, /LTSV_ACCESS_CODES/);
   assert.match(authRoute, /normalizeAccessCode/);
+  assert.match(authRoute, /fallbackAccessCodes/);
   assert.match(netlifyState, /mergeOfficeState/);
   assert.match(netlifyState, /mergeAttendance/);
   assert.match(netlifyState, /store\.get\(stateKey/);
   assert.match(netlifyState, /store\.setJSON\(stateKey, nextPayload/);
   assert.match(netlifyAuth, /LTSV_ACCESS_CODES/);
   assert.match(netlifyAuth, /normalizeAccessCode/);
+  assert.match(netlifyAuth, /fallbackAccessCodes/);
+  assert.match(netlifyAuth, /sonali@hrd/);
+  assert.match(netlifyAuth, /vishwatej@bdo/);
   assert.match(netlifyToml, /\/api\/auth/);
   assert.match(schema, /officeState/);
   assert.doesNotMatch(packageJson, /react-loading-skeleton/);
