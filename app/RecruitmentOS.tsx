@@ -881,7 +881,27 @@ function countLeaveDays(fromDate: string, toDate: string, month: string) {
     return 0;
   }
 
-  return Math.floor((end.getTime() - start.getTime()) / 86400000) + 1;
+  let count = 0;
+  const date = new Date(start);
+
+  while (date <= end) {
+    if (date.getDay() !== 0) count += 1;
+    date.setDate(date.getDate() + 1);
+  }
+
+  return count;
+}
+
+function countSundaysInMonth(month: string) {
+  const [year, monthNumber] = month.split("-").map(Number);
+  const daysInMonth = getDaysInMonth(month);
+  let count = 0;
+
+  for (let day = 1; day <= daysInMonth; day += 1) {
+    if (new Date(year, monthNumber - 1, day).getDay() === 0) count += 1;
+  }
+
+  return count;
 }
 
 function getLatePenaltyDays(lateCount: number) {
@@ -1337,7 +1357,8 @@ export default function RecruitmentOS() {
       <tr><td class="label">Designation</td><td>${htmlEscape(salarySlip.profile.designation)}</td><td class="label">DOJ</td><td>${htmlEscape(salarySlip.profile.doj)}</td></tr>
       <tr><td class="label">Location</td><td>${htmlEscape(salarySlip.profile.location)}</td><td class="label">Aadhaar</td><td>${htmlEscape(salarySlip.profile.aadhaarMasked)}</td></tr>
       <tr><td class="label">LOP</td><td>${salarySlip.lopDays}</td><td class="label">Department</td><td>${htmlEscape(salarySlip.profile.department)}</td></tr>
-      <tr><td class="label">Payable Days</td><td>${Math.max(0, salarySlip.daysInMonth - salarySlip.lopDays - salarySlip.latePenaltyDays)}</td><td class="label">Days In Month</td><td>${salarySlip.daysInMonth}</td></tr>
+      <tr><td class="label">Payable Days</td><td>${salarySlip.payableDays}</td><td class="label">Days In Month</td><td>${salarySlip.daysInMonth}</td></tr>
+      <tr><td class="label">Attendance Present</td><td>${salarySlip.attendancePresentDays}</td><td class="label">Paid Sundays</td><td>${salarySlip.paidSundayDays}</td></tr>
       <tr><td class="label">Late Marks</td><td>${salarySlip.lateCount}</td><td class="label">Late Deduction Days</td><td>${salarySlip.latePenaltyDays}</td></tr>
     </table>
     <section class="grid">
@@ -1665,7 +1686,7 @@ export default function RecruitmentOS() {
         isDateInMonth(log.date, salaryMonth) &&
         log.verification !== "Rejected",
     );
-    const presentDays = monthLogs.reduce((sum, log) => {
+    const attendancePresentDays = monthLogs.reduce((sum, log) => {
       if (log.status === "Half day") return sum + 0.5;
       if (log.status === "On time" || log.status === "Late") return sum + 1;
       return sum;
@@ -1686,8 +1707,11 @@ export default function RecruitmentOS() {
         0,
       );
     const daysInMonth = getDaysInMonth(salaryMonth);
+    const paidSundayDays = countSundaysInMonth(salaryMonth);
+    const presentDays = attendancePresentDays + paidSundayDays;
     const lopDays = absentDays + approvedLeaveDays + salaryAdjustment.manualLopDays;
     const latePenaltyDays = getLatePenaltyDays(lateCount);
+    const payableDays = Math.max(0, daysInMonth - lopDays - latePenaltyDays);
     const totalEarnings =
       salaryProfile.basicSalary +
       salaryProfile.hra +
@@ -1707,7 +1731,10 @@ export default function RecruitmentOS() {
       month: salaryMonth,
       monthLabel: getMonthLabel(salaryMonth),
       daysInMonth,
+      attendancePresentDays,
+      paidSundayDays,
       presentDays,
+      payableDays,
       absentDays,
       approvedLeaveDays,
       manualLopDays: salaryAdjustment.manualLopDays,
@@ -3509,6 +3536,9 @@ export default function RecruitmentOS() {
                   <div><strong>Department</strong><span>{salarySlip.profile.department}</span></div>
                   <div><strong>Days in Month</strong><span>{salarySlip.daysInMonth}</span></div>
                   <div><strong>Present Days</strong><span>{salarySlip.presentDays}</span></div>
+                  <div><strong>Attendance Present</strong><span>{salarySlip.attendancePresentDays}</span></div>
+                  <div><strong>Paid Sundays</strong><span>{salarySlip.paidSundayDays}</span></div>
+                  <div><strong>Payable Days</strong><span>{salarySlip.payableDays}</span></div>
                   <div><strong>LOP Days</strong><span>{salarySlip.lopDays}</span></div>
                   <div><strong>Late Marks</strong><span>{salarySlip.lateCount}</span></div>
                   <div><strong>Late Deduction</strong><span>{salarySlip.latePenaltyDays} day</span></div>
@@ -3611,9 +3641,10 @@ export default function RecruitmentOS() {
               <div className="access-note">
                 <strong>Calculation rule</strong>
                 <span>
-                  Salary is divided by days in month. Non-paid leave/absent days
-                  are LOP. 3-4 late marks deduct half day; 5 or more late marks
-                  deduct one full day.
+                  Salary is divided by days in month. Sundays are paid weekly
+                  off days and do not need QR attendance. Non-paid leave/absent
+                  days are LOP. 3-4 late marks deduct half day; 5 or more late
+                  marks deduct one full day.
                 </span>
               </div>
             </div>

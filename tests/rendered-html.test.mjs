@@ -65,6 +65,10 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /Sonali payroll control/);
   assert.match(app, /LTSV PVT LTD/);
   assert.match(app, /Priti Sheshrao Dawande/);
+  assert.match(app, /Paid Sundays/);
+  assert.match(app, /Attendance Present/);
+  assert.match(app, /countSundaysInMonth/);
+  assert.match(app, /Sundays are paid weekly/);
   assert.match(app, /Refresh Data/);
   assert.match(app, /Saved online/);
   assert.match(app, /keepalive: true/);
