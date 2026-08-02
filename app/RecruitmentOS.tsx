@@ -216,6 +216,8 @@ const companyPayrollInfo = {
   authorizedSignatory: "SAGAR SONAWANE",
 };
 
+const renamedClientCompany = "R&D THERM INDIA PVT LTD";
+const renamedClientModel = "5% Annual CTC";
 const officialLaunchDate = "2026-08-01";
 const freshStartResetVersion = "fresh-start-2026-08-01-v2";
 
@@ -677,6 +679,16 @@ function normalizeStaffName(name: string) {
   return name.replace(/Rohan Dongre/g, "Rohan Dangle").replace(/Preeti/g, "Priti");
 }
 
+function normalizeClientCompany(company: string) {
+  return company.trim().toLowerCase() === "konark global"
+    ? renamedClientCompany
+    : company;
+}
+
+function normalizeClientModel(company: string, model: string) {
+  return company === renamedClientCompany ? renamedClientModel : model;
+}
+
 function getSeedMemberEmail(member: Member) {
   const normalizedName = normalizeStaffName(member.name).toLowerCase();
   const seedMember = seedState.members.find(
@@ -729,10 +741,16 @@ function normalizeOfficeState(payload: OfficeState): OfficeState {
   return {
     resetVersion: freshStartResetVersion,
     members: mergeSeedMembers(payload.members ?? []),
-    clients: clients.map((client) => ({
-      ...client,
-      status: client.status === "Agreement" ? "Agreement Sent" : client.status,
-    })),
+    clients: clients.map((client) => {
+      const company = normalizeClientCompany(client.company);
+
+      return {
+        ...client,
+        company,
+        model: normalizeClientModel(company, client.model),
+        status: client.status === "Agreement" ? "Agreement Sent" : client.status,
+      };
+    }),
     requirements: payload.requirements?.length
       ? payload.requirements.map((requirement) => ({
           ...requirement,
@@ -1816,17 +1834,22 @@ export default function RecruitmentOS() {
   function addClient(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const form = new FormData(event.currentTarget);
+    const company = normalizeClientCompany(String(form.get("company") || "New company"));
+    const commercialModel =
+      String(form.get("customModel") || "").trim() ||
+      String(form.get("model") || "8.33% Annual CTC");
+
     setState((current) => ({
       ...current,
       clients: [
         {
           id: makeId("client"),
-          company: String(form.get("company") || "New company"),
+          company,
           contact: String(form.get("contact") || "HR"),
           city: String(form.get("city") || "Nashik"),
           industry: String(form.get("industry") || "General"),
           status: "Prospect",
-          model: String(form.get("model") || "8.33% Annual CTC"),
+          model: normalizeClientModel(company, commercialModel),
           owner: ownedName(form),
           nextFollowUp: String(form.get("nextFollowUp") || "Tomorrow"),
         },
@@ -2904,6 +2927,10 @@ export default function RecruitmentOS() {
                   <option>10% Monthly</option>
                   <option>60% One Month Salary</option>
                 </select>
+                <input
+                  name="customModel"
+                  placeholder="Custom negotiated model, e.g. 5% Annual CTC"
+                />
                 {isAdmin ? (
                   <select name="owner" aria-label="Client owner" defaultValue={activeMember?.name}>
                     {assignableMembers.map((member) => (
