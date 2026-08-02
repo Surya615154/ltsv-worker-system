@@ -85,7 +85,6 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /Satish Khillare/);
   assert.match(app, /Vaishnavi Borhade/);
   assert.match(app, /Gayatri Pawar/);
-  assert.match(app, /Nandini/);
   assert.doesNotMatch(app, /6 digit office code/);
   assert.doesNotMatch(app, /6 digit attendance code/);
   assert.doesNotMatch(app, /inputMode="numeric"/);

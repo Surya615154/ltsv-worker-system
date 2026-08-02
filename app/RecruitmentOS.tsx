@@ -316,18 +316,6 @@ const salaryProfiles: SalaryProfile[] = [
     basicSalary: 9000,
     hra: 0,
   },
-  {
-    memberId: "m10",
-    salaryName: "Nandini Subhash Ghegadmal",
-    designation: "Team Leader",
-    department: "DSA",
-    location: "Nashik",
-    dob: "08/04/2010",
-    doj: "23/05/2025",
-    aadhaarMasked: "To be updated",
-    basicSalary: 6000,
-    hra: 0,
-  },
 ];
 
 const seedState: OfficeState = {
@@ -468,21 +456,6 @@ const seedState: OfficeState = {
       interviews: 0,
       target: 45,
     },
-    {
-      id: "m10",
-      name: "Nandini",
-      email: "ghegadmalnandini@gmail.com",
-      role: "Team Leader Finance",
-      desk: "Finance control",
-      responsibility:
-        "Invoice tracking, payment follow-up, finance coordination, and collection reporting.",
-      targetText: "Daily invoice review + payment follow-up report",
-      attendance: "Absent",
-      calls: 0,
-      cv: 0,
-      interviews: 0,
-      target: 25,
-    },
   ],
   clients: [],
   requirements: [],
@@ -612,10 +585,6 @@ const loginProfiles: LoginProfile[] = [
     memberId: "m9",
     access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
-  {
-    memberId: "m10",
-    access: ["Launch", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
-  },
 ];
 
 const defaultViews = [
@@ -718,11 +687,21 @@ function getSeedMemberEmail(member: Member) {
 }
 
 function mergeSeedMembers(members: Member[]) {
-  const loadedMembers = (members.length ? members : seedState.members).map((member) => ({
-    ...member,
-    name: normalizeStaffName(member.name),
-    email: getSeedMemberEmail(member),
-  }));
+  const activeMemberIds = new Set(seedState.members.map((member) => member.id));
+  const activeMemberNames = new Set(
+    seedState.members.map((member) => member.name.toLowerCase()),
+  );
+  const loadedMembers = (members.length ? members : seedState.members)
+    .map((member) => ({
+      ...member,
+      name: normalizeStaffName(member.name),
+      email: getSeedMemberEmail(member),
+    }))
+    .filter(
+      (member) =>
+        activeMemberIds.has(member.id) ||
+        activeMemberNames.has(member.name.toLowerCase()),
+    );
   const existingIds = new Set(loadedMembers.map((member) => member.id));
   const existingNames = new Set(
     loadedMembers.map((member) => member.name.toLowerCase()),

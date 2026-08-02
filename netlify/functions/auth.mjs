@@ -26,7 +26,6 @@ const fallbackAccessCodes = {
   m7: "satish@20072004",
   m8: "vaishnavi@03062005",
   m9: "gayatri@21071999",
-  m10: "nandini@08042010",
 };
 
 function getCodeMap() {
