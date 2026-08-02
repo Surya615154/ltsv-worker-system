@@ -578,6 +578,7 @@ const loginProfiles: LoginProfile[] = [
       "Attendance",
       "Leave",
       "Gate Pass",
+      "Money",
       "Reports",
       "Export",
       "Salary Slip",
@@ -589,7 +590,7 @@ const loginProfiles: LoginProfile[] = [
   },
   {
     memberId: "m4",
-    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
+    access: ["Launch", "Pipeline", "Tasks", "Attendance", "Leave", "Gate Pass", "Money", "Reports"],
   },
   {
     memberId: "m5",
@@ -613,7 +614,7 @@ const loginProfiles: LoginProfile[] = [
   },
   {
     memberId: "m10",
-    access: ["Launch", "Money", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
+    access: ["Launch", "Tasks", "Attendance", "Leave", "Gate Pass", "Reports"],
   },
 ];
 
@@ -1195,6 +1196,8 @@ export default function RecruitmentOS() {
   const isSonali = loggedInMemberId === "m2";
   const isAdmin = loggedInMemberId === "m1" || loggedInMemberId === "m2";
   const canManageManualAttendance = loggedInMemberId === "m3";
+  const canManageMoney = loggedInMemberId === "m4";
+  const canViewMoney = isBoss || isSonali || canManageMoney;
   const canViewSalarySlip = isBoss || isSonali;
   const canEditSalarySlip = isSonali;
   const visibleViews = loggedInProfile?.access ?? defaultViews;
@@ -1966,6 +1969,8 @@ export default function RecruitmentOS() {
   }
 
   function updateInvoiceStatus(id: string, status: Invoice["status"]) {
+    if (!canManageMoney) return;
+
     setState((current) => ({
       ...current,
       invoices: current.invoices.map((item) =>
@@ -1988,6 +1993,8 @@ export default function RecruitmentOS() {
 
   function addInvoice(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
+    if (!canManageMoney) return;
+
     const form = new FormData(event.currentTarget);
     setState((current) => ({
       ...current,
@@ -1997,7 +2004,7 @@ export default function RecruitmentOS() {
           company: String(form.get("company") || "Client"),
           candidate: String(form.get("candidate") || "Candidate"),
           amount: Number(form.get("amount") || 0),
-          owner: ownedName(form),
+          owner: loggedInMember?.name || "Rohan Dangle",
           status: "Draft",
           due: String(form.get("due") || "This week"),
         },
@@ -3379,10 +3386,13 @@ export default function RecruitmentOS() {
           </section>
         )}
 
-        {activeView === "Money" && (
+        {activeView === "Money" && canViewMoney && (
           <section className="board-grid">
             <div className="panel wide">
-              <PanelHeader title="Invoice and Payment Tracker" label="Joining to collection" />
+              <PanelHeader
+                title="Invoice and Payment Tracker"
+                label={canManageMoney ? "Rohan payment control" : "View only"}
+              />
               <div className="data-table money-table">
                 <div className="table-head">
                   <span>Client</span>
@@ -3402,6 +3412,7 @@ export default function RecruitmentOS() {
                     <span>{invoice.owner}</span>
                     <select
                       aria-label={`Invoice status for ${invoice.company}`}
+                      disabled={!canManageMoney}
                       value={invoice.status}
                       onChange={(event) =>
                         updateInvoiceStatus(invoice.id, event.target.value as Invoice["status"])
@@ -3417,19 +3428,28 @@ export default function RecruitmentOS() {
             </div>
 
             <div className="panel">
-              <PanelHeader title="Create Invoice Entry" label="After joining" />
-              <form className="form-stack" onSubmit={addInvoice}>
-                <input name="company" placeholder="Client company" />
-                <input name="candidate" placeholder="Candidate / joining batch" />
-                <input name="amount" placeholder="Invoice amount" type="number" min="0" />
-                <select name="owner" aria-label="Invoice owner" defaultValue={activeMember?.name}>
-                  {assignableMembers.map((member) => (
-                    <option key={member.id}>{member.name}</option>
-                  ))}
-                </select>
-                <input name="due" placeholder="Due / payment follow-up" />
-                <button type="submit">Add Invoice</button>
-              </form>
+              <PanelHeader
+                title="Create Invoice Entry"
+                label={canManageMoney ? "After joining" : "Rohan only"}
+              />
+              {canManageMoney ? (
+                <form className="form-stack" onSubmit={addInvoice}>
+                  <input name="company" placeholder="Client company" />
+                  <input name="candidate" placeholder="Candidate / joining batch" />
+                  <input name="amount" placeholder="Invoice amount" type="number" min="0" />
+                  <div className="identity-lock form-lock">
+                    <span>Money handled by</span>
+                    <strong>{loggedInMember?.name || "Rohan Dangle"}</strong>
+                  </div>
+                  <input name="due" placeholder="Due / payment follow-up" />
+                  <button type="submit">Add Invoice</button>
+                </form>
+              ) : (
+                <div className="access-note">
+                  <strong>Money access is view only</strong>
+                  <span>Invoice and payment entries are handled only by Rohan sir.</span>
+                </div>
+              )}
             </div>
           </section>
         )}

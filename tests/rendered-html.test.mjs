@@ -56,6 +56,10 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /Staff Discipline Sheet/);
   assert.match(app, /Candidate Tracker/);
   assert.match(app, /Invoice and Payment Tracker/);
+  assert.match(app, /Rohan payment control/);
+  assert.match(app, /Money access is view only/);
+  assert.match(app, /Invoice and payment entries are handled only by Rohan sir/);
+  assert.match(app, /canManageMoney = loggedInMemberId === "m4"/);
   assert.match(app, /Quick Staff Update/);
   assert.match(app, /Export Data/);
   assert.match(app, /Download CSV/);
