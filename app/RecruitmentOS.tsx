@@ -812,13 +812,73 @@ function normalizeOfficeState(payload: OfficeState): OfficeState {
   };
 }
 
-function getTodayDate() {
-  const today = new Date();
-  const year = today.getFullYear();
-  const month = String(today.getMonth() + 1).padStart(2, "0");
-  const day = String(today.getDate()).padStart(2, "0");
+function getTodayDate(date = new Date()) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
 
   return `${year}-${month}-${day}`;
+}
+
+function addDaysToDateString(dateString: string, days: number) {
+  const date = new Date(dateString);
+  date.setDate(date.getDate() + days);
+  return getTodayDate(date);
+}
+
+function getAttendanceDisplayDate(date = new Date()) {
+  return date.getHours() >= 23
+    ? addDaysToDateString(getTodayDate(date), 1)
+    : getTodayDate(date);
+}
+
+function findAttendanceLog(
+  logs: AttendanceLog[],
+  memberName: string,
+  date: string,
+  includeRejected = true,
+) {
+  return logs.find(
+    (log) =>
+      log.member === memberName &&
+      log.date === date &&
+      (includeRejected || log.verification !== "Rejected"),
+  );
+}
+
+function buildDateWiseAttendanceRows(
+  members: Member[],
+  logs: AttendanceLog[],
+  date: string,
+) {
+  return members.map((member) => {
+    const existingLog = findAttendanceLog(logs, member.name, date);
+    if (existingLog) return existingLog;
+
+    return {
+      id: `absent-${member.id}-${date}`,
+      member: member.name,
+      date,
+      checkIn: "-",
+      checkOut: "",
+      status: "Absent",
+      lateMinutes: 0,
+      method: "Manual",
+      verification: "Verified",
+      locationText: "No attendance scan for this date.",
+      mapLink: "",
+      alertText: "",
+    } as AttendanceLog;
+  });
+}
+
+function getMemberAttendanceStatus(
+  logs: AttendanceLog[],
+  memberName: string,
+  date: string,
+) {
+  const log = findAttendanceLog(logs, memberName, date, false);
+  return log?.status ?? "Absent";
 }
 
 function getCurrentClockTime() {
@@ -897,6 +957,63 @@ function countSundaysInMonth(month: string) {
 
   for (let day = 1; day <= daysInMonth; day += 1) {
     if (new Date(year, monthNumber - 1, day).getDay() === 0) count += 1;
+  }
+
+  return count;
+}
+
+function getPayrollCutoffDate(month: string, officeDate: string) {
+  const officeMonth = officeDate.slice(0, 7);
+
+  if (month < officeMonth) {
+    return `${month}-${String(getDaysInMonth(month)).padStart(2, "0")}`;
+  }
+
+  if (month === officeMonth) {
+    return officeDate;
+  }
+
+  return "";
+}
+
+function isSundayDate(dateString: string) {
+  return new Date(dateString).getDay() === 0;
+}
+
+function isApprovedLeaveDate(
+  dateString: string,
+  memberName: string,
+  leaveRequests: LeaveRequest[],
+) {
+  return leaveRequests.some(
+    (leave) =>
+      leave.member === memberName &&
+      leave.status === "Granted" &&
+      leave.fromDate <= dateString &&
+      (leave.toDate || leave.fromDate) >= dateString,
+  );
+}
+
+function countMissingAttendanceDays(
+  memberName: string,
+  month: string,
+  logs: AttendanceLog[],
+  leaveRequests: LeaveRequest[],
+  cutoffDate: string,
+) {
+  if (!cutoffDate) return 0;
+
+  const daysInMonth = getDaysInMonth(month);
+  const cutoffDay = Number(cutoffDate.slice(-2));
+  let count = 0;
+
+  for (let day = 1; day <= Math.min(daysInMonth, cutoffDay); day += 1) {
+    const date = `${month}-${String(day).padStart(2, "0")}`;
+    if (isSundayDate(date)) continue;
+    if (isApprovedLeaveDate(date, memberName, leaveRequests)) continue;
+    if (findAttendanceLog(logs, memberName, date, false)) continue;
+
+    count += 1;
   }
 
   return count;
@@ -1043,6 +1160,7 @@ export default function RecruitmentOS() {
   const [qrLocationStatus, setQrLocationStatus] = useState("Tap location before marking attendance.");
   const [qrMessage, setQrMessage] = useState("");
   const [currentDateTime, setCurrentDateTime] = useState("");
+  const [attendanceHistoryDate, setAttendanceHistoryDate] = useState(getAttendanceDisplayDate());
   const [salaryMonth, setSalaryMonth] = useState(getMonthKey());
   const [salaryMemberId, setSalaryMemberId] = useState("m4");
   const attendanceQrLink = useMemo(() => {
@@ -1170,6 +1288,15 @@ export default function RecruitmentOS() {
     return () => window.clearTimeout(handle);
   }, [remoteLoaded, state]);
 
+  const attendanceDisplayDate = useMemo(
+    () => getAttendanceDisplayDate(),
+    [currentDateTime],
+  );
+
+  useEffect(() => {
+    setAttendanceHistoryDate(attendanceDisplayDate);
+  }, [attendanceDisplayDate]);
+
   const activeMember = useMemo(
     () =>
       state.members.find((member) => member.id === activeMemberId) ??
@@ -1206,9 +1333,23 @@ export default function RecruitmentOS() {
   const visibleTasks = isAdmin
     ? state.tasks
     : state.tasks.filter((task) => task.owner === loggedInMember?.name);
-  const visibleAttendanceLogs = isAdmin
-    ? state.attendanceLogs
-    : state.attendanceLogs.filter((log) => log.member === loggedInMember?.name);
+  const dateWiseAttendanceRows = useMemo(() => {
+    const rows = buildDateWiseAttendanceRows(
+      state.members,
+      state.attendanceLogs,
+      attendanceHistoryDate,
+    );
+
+    return isAdmin
+      ? rows
+      : rows.filter((log) => log.member === loggedInMember?.name);
+  }, [
+    attendanceHistoryDate,
+    isAdmin,
+    loggedInMember?.name,
+    state.attendanceLogs,
+    state.members,
+  ]);
   const visibleReports = isAdmin
     ? state.reports
     : state.reports.filter((report) => report.member === loggedInMember?.name);
@@ -1359,6 +1500,7 @@ export default function RecruitmentOS() {
       <tr><td class="label">LOP</td><td>${salarySlip.lopDays}</td><td class="label">Department</td><td>${htmlEscape(salarySlip.profile.department)}</td></tr>
       <tr><td class="label">Payable Days</td><td>${salarySlip.payableDays}</td><td class="label">Days In Month</td><td>${salarySlip.daysInMonth}</td></tr>
       <tr><td class="label">Attendance Present</td><td>${salarySlip.attendancePresentDays}</td><td class="label">Paid Sundays</td><td>${salarySlip.paidSundayDays}</td></tr>
+      <tr><td class="label">Unscanned Absents</td><td>${salarySlip.missingAttendanceDays}</td><td class="label">Approved Leave Days</td><td>${salarySlip.approvedLeaveDays}</td></tr>
       <tr><td class="label">Late Marks</td><td>${salarySlip.lateCount}</td><td class="label">Late Deduction Days</td><td>${salarySlip.latePenaltyDays}</td></tr>
     </table>
     <section class="grid">
@@ -1434,9 +1576,8 @@ export default function RecruitmentOS() {
     );
     const openTasks = state.tasks.filter((item) => item.status !== "Done");
     const blockedTasks = state.tasks.filter((item) => item.status === "Blocked");
-    const today = getTodayDate();
     const todayAttendance = state.attendanceLogs.filter(
-      (item) => item.date === today,
+      (item) => item.date === attendanceDisplayDate,
     );
     const lateToday = todayAttendance.filter((item) => item.status === "Late");
     const pendingLeaves = state.leaveRequests.filter(
@@ -1470,7 +1611,7 @@ export default function RecruitmentOS() {
       pendingGatePasses: pendingGatePasses.length,
       pendingAttendance: pendingAttendance.length,
     };
-  }, [state]);
+  }, [attendanceDisplayDate, state]);
 
   const exportSets = useMemo(
     () => [
@@ -1709,7 +1850,19 @@ export default function RecruitmentOS() {
     const daysInMonth = getDaysInMonth(salaryMonth);
     const paidSundayDays = countSundaysInMonth(salaryMonth);
     const presentDays = attendancePresentDays + paidSundayDays;
-    const lopDays = absentDays + approvedLeaveDays + salaryAdjustment.manualLopDays;
+    const payrollCutoffDate = getPayrollCutoffDate(salaryMonth, attendanceDisplayDate);
+    const missingAttendanceDays = countMissingAttendanceDays(
+      employeeName,
+      salaryMonth,
+      state.attendanceLogs,
+      state.leaveRequests,
+      payrollCutoffDate,
+    );
+    const lopDays =
+      absentDays +
+      missingAttendanceDays +
+      approvedLeaveDays +
+      salaryAdjustment.manualLopDays;
     const latePenaltyDays = getLatePenaltyDays(lateCount);
     const payableDays = Math.max(0, daysInMonth - lopDays - latePenaltyDays);
     const totalEarnings =
@@ -1736,6 +1889,7 @@ export default function RecruitmentOS() {
       presentDays,
       payableDays,
       absentDays,
+      missingAttendanceDays,
       approvedLeaveDays,
       manualLopDays: salaryAdjustment.manualLopDays,
       lopDays,
@@ -1757,6 +1911,7 @@ export default function RecruitmentOS() {
       notes: salaryAdjustment.notes,
     };
   }, [
+    attendanceDisplayDate,
     salaryAdjustment,
     salaryMember,
     salaryMonth,
@@ -2963,22 +3118,30 @@ export default function RecruitmentOS() {
                   <span>Interviews</span>
                   <span>Score</span>
                 </div>
-                {state.members.map((member) => (
-                  <div className="table-row" key={member.id}>
-                    <span>
-                      <strong>{member.name}</strong>
-                      <small>{member.role} / {member.desk}</small>
-                      <small>{member.email}</small>
-                    </span>
-                    <span className={`attendance ${member.attendance.toLowerCase().replace(" ", "-")}`}>
-                      {member.attendance}
-                    </span>
-                    <span>{member.calls}</span>
-                    <span>{member.cv}</span>
-                    <span>{member.interviews}</span>
-                    <span>{scoreMember(member)}%</span>
-                  </div>
-                ))}
+                {state.members.map((member) => {
+                  const sameDayStatus = getMemberAttendanceStatus(
+                    state.attendanceLogs,
+                    member.name,
+                    attendanceDisplayDate,
+                  );
+
+                  return (
+                    <div className="table-row" key={member.id}>
+                      <span>
+                        <strong>{member.name}</strong>
+                        <small>{member.role} / {member.desk}</small>
+                        <small>{member.email}</small>
+                      </span>
+                      <span className={`attendance ${sameDayStatus.toLowerCase().replace(" ", "-")}`}>
+                        {sameDayStatus}
+                      </span>
+                      <span>{member.calls}</span>
+                      <span>{member.cv}</span>
+                      <span>{member.interviews}</span>
+                      <span>{scoreMember(member)}%</span>
+                    </div>
+                  );
+                })}
               </div>
             </div>
 
@@ -3095,7 +3258,21 @@ export default function RecruitmentOS() {
         {activeView === "Attendance" && (
           <section className="board-grid">
             <div className="panel wide">
-              <PanelHeader title="Attendance and Late Mark" label="Daily discipline" />
+              <PanelHeader title="Attendance and Late Mark" label="Date-wise discipline history" />
+              <div className="salary-controls">
+                <label className="time-field">
+                  <span>Attendance date</span>
+                  <input
+                    type="date"
+                    value={attendanceHistoryDate}
+                    onChange={(event) => setAttendanceHistoryDate(event.target.value)}
+                  />
+                </label>
+                <div className="identity-lock">
+                  <span>Today board resets at</span>
+                  <strong>11:00 PM</strong>
+                </div>
+              </div>
               <div className="data-table attendance-table">
                 <div className="table-head">
                   <span>Staff</span>
@@ -3105,7 +3282,7 @@ export default function RecruitmentOS() {
                   <span>Verify</span>
                   <span>Proof</span>
                 </div>
-                {visibleAttendanceLogs.map((log) => (
+                {dateWiseAttendanceRows.map((log) => (
                   <div className="table-row" key={log.id}>
                     <span><strong>{log.member}</strong></span>
                     <span>{log.date}</span>
@@ -3566,6 +3743,7 @@ export default function RecruitmentOS() {
                   <div><strong>Paid Sundays</strong><span>{salarySlip.paidSundayDays}</span></div>
                   <div><strong>Payable Days</strong><span>{salarySlip.payableDays}</span></div>
                   <div><strong>LOP Days</strong><span>{salarySlip.lopDays}</span></div>
+                  <div><strong>Unscanned Absents</strong><span>{salarySlip.missingAttendanceDays}</span></div>
                   <div><strong>Late Marks</strong><span>{salarySlip.lateCount}</span></div>
                   <div><strong>Late Deduction</strong><span>{salarySlip.latePenaltyDays} day</span></div>
                 </div>

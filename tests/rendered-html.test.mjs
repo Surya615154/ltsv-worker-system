@@ -23,6 +23,14 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /CEO Risk Queue/);
   assert.match(app, /Task Assignment Board/);
   assert.match(app, /Attendance and Late Mark/);
+  assert.match(app, /Date-wise discipline history/);
+  assert.match(app, /Attendance date/);
+  assert.match(app, /Today board resets at/);
+  assert.match(app, /11:00 PM/);
+  assert.match(app, /No attendance scan for this date/);
+  assert.match(app, /getAttendanceDisplayDate/);
+  assert.match(app, /buildDateWiseAttendanceRows/);
+  assert.match(app, /getMemberAttendanceStatus/);
   assert.match(app, /Leave Permission Board/);
   assert.match(app, /Request Leave/);
   assert.match(app, /Submit Leave Request/);
@@ -75,6 +83,8 @@ test("contains the recruitment office operating system", async () => {
   assert.match(app, /Priti Sheshrao Dawande/);
   assert.match(app, /Paid Sundays/);
   assert.match(app, /Attendance Present/);
+  assert.match(app, /Unscanned Absents/);
+  assert.match(app, /countMissingAttendanceDays/);
   assert.match(app, /countSundaysInMonth/);
   assert.match(app, /Sundays are paid weekly/);
   assert.match(app, /Refresh Data/);
